@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-main: #F8FAFC;
+    --bg-card: #FFFFFF;
+    --border-subtle: #E2E8F0;
+    --indigo-accent: #4F46E5;
+    --text-primary: #0F172A;
+    --text-secondary: #64748B;
+  }
+}
+
+/* Custom Typography */
+.font-mono-tech {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.font-heading {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.font-outfit {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Clean, Production-Grade Surfaces */
+.glass-panel {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
+}
+
+.glass-panel-solid {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.04), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
+}
+
+.glass-card-interactive {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-card-interactive:hover {
+  transform: translateY(-1px);
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.06);
+}
+
+.glass-navbar {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.glass-pill {
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  border-radius: 9999px;
+}
+
+.glass-input {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.02);
+}
+.glass-input:focus {
+  border-color: #6366F1;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* Subtle, Minimal Background Grid */
+.bg-subtle-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F8FAFC;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Sound Wave Animations for Dynamic Audio Status */
+@keyframes soundwave-speaking {
+  0%, 100% { height: 4px; }
+  50% { height: 16px; }
+}
+
+@keyframes soundwave-listening {
+  0%, 100% { height: 5px; opacity: 0.5; }
+  50% { height: 13px; opacity: 1; }
+}
+
+.animate-wave-speak-1 { animation: soundwave-speaking 0.6s ease-in-out infinite; }
+.animate-wave-speak-2 { animation: soundwave-speaking 0.45s ease-in-out infinite 0.15s; }
+.animate-wave-speak-3 { animation: soundwave-speaking 0.55s ease-in-out infinite 0.05s; }
+.animate-wave-speak-4 { animation: soundwave-speaking 0.4s ease-in-out infinite 0.2s; }
+.animate-wave-speak-5 { animation: soundwave-speaking 0.5s ease-in-out infinite 0.1s; }
+
+.animate-wave-listen-1 { animation: soundwave-listening 0.9s ease-in-out infinite; }
+.animate-wave-listen-2 { animation: soundwave-listening 0.75s ease-in-out infinite 0.15s; }
+.animate-wave-listen-3 { animation: soundwave-listening 0.85s ease-in-out infinite 0.08s; }
+.animate-wave-listen-4 { animation: soundwave-listening 0.7s ease-in-out infinite 0.2s; }
+.animate-wave-listen-5 { animation: soundwave-listening 0.8s ease-in-out infinite 0.12s; }

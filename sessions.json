@@ -1,0 +1,16 @@
+[
+  {
+    "session_id": null,
+    "question": null,
+    "transcript": "I engineered low-latency WebSockets streaming microservice with PyTorch ResNet-18 model.",
+    "telemetry_history": [],
+    "anomaly_logs": [],
+    "duration_seconds": 145,
+    "final_score": 93,
+    "dominant_emotion": "Confident / Happy",
+    "avg_eye_contact": 95,
+    "avg_wpm": 142,
+    "id": "session_1787150064",
+    "created_at": "2026-08-19T20:04:24.244179"
+  }
+]
