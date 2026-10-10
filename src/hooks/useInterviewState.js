@@ -30,8 +30,8 @@ export function useInterviewState() {
       nervous: 8,
       surprised: 6,
     },
-    speechWPM: 142,
-    audioVolume: 48,
+    speechWPM: 0,
+    audioVolume: 0,
     pitchYawRoll: { pitch: -0.5, yaw: 0.2, roll: 0.1 },
     fps: 60,
     latencyMs: 12
@@ -75,7 +75,7 @@ export function useInterviewState() {
 
   // Live Speech Transcript
   const [transcript, setTranscript] = useState(
-    'For a real-time telemetry analysis pipeline, I would leverage WebSockets for low-latency frame streaming to edge workers, coupled with partitioned Kafka topics...'
+    ''
   );
 
   // Resume & ATS Matcher State
@@ -202,51 +202,7 @@ export function useInterviewState() {
       });
   }, []);
 
-  // Web Speech Recognition API Integration
-  useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition && isRecording && !isPaused && !isMuted) {
-      try {
-        const recognition = new SpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.lang = 'en-US';
-
-        recognition.onresult = (event) => {
-          let currentSpeech = '';
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            currentSpeech += event.results[i][0].transcript;
-          }
-          if (currentSpeech.trim()) {
-            setTranscript((prev) => {
-              const cleaned = prev.endsWith(' ') ? prev : prev + ' ';
-              return cleaned + currentSpeech;
-            });
-          }
-        };
-
-        recognition.onerror = (e) => {
-          console.warn('Speech recognition error:', e.error);
-        };
-
-        recognition.start();
-        recognitionRef.current = recognition;
-      } catch (err) {
-        console.warn('Speech recognition could not start:', err);
-      }
-    } else {
-      if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch { /* noop */ }
-        recognitionRef.current = null;
-      }
-    }
-
-    return () => {
-      if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch { /* noop */ }
-      }
-    };
-  }, [isRecording, isPaused, isMuted]);
+  // SpeechRecognition is managed centrally inside InterviewRoom
 
   // Push Telemetry Helper
   const pushTelemetryPoint = useCallback((point) => {
@@ -285,7 +241,8 @@ export function useInterviewState() {
         setSessionTime((t) => t + 1);
 
         const eye = Math.min(99, Math.max(68, Math.floor(90 + (Math.random() * 10 - 4))));
-        const wpm = Math.min(180, Math.max(115, Math.floor(142 + (Math.random() * 20 - 10))));
+        const hasWords = transcript && transcript.trim().length > 0;
+        const wpm = hasWords ? Math.min(180, Math.max(115, Math.floor(142 + (Math.random() * 20 - 10)))) : 0;
         const happy = Math.min(88, Math.max(35, Math.floor(62 + (Math.random() * 14 - 7))));
         const neutral = Math.min(42, Math.max(12, Math.floor(22 + (Math.random() * 8 - 4))));
         const nervous = Math.min(30, Math.max(2, Math.floor(8 + (Math.random() * 6 - 3))));
@@ -423,11 +380,15 @@ export function useInterviewState() {
 
   // Action: Next Question
   const nextQuestion = useCallback(() => {
-    if (currentQuestionIndex < questionBank.length - 1) {
-      setCurrentQuestionIndex((prev) => prev + 1);
-      setTranscript((prev) => prev + '\n\n[Moving to Question ' + (currentQuestionIndex + 2) + '] ');
-    }
-  }, [currentQuestionIndex, questionBank.length]);
+    setCurrentQuestionIndex((prev) => (prev + 1) % questionBank.length);
+    setTranscript('');
+  }, [questionBank.length]);
+
+  // Action: Previous Question
+  const prevQuestion = useCallback(() => {
+    setCurrentQuestionIndex((prev) => (prev - 1 + questionBank.length) % questionBank.length);
+    setTranscript('');
+  }, [questionBank.length]);
 
   // Action: Select specific question and start
   const selectQuestionAndStart = useCallback((questionOrId) => {
@@ -441,7 +402,7 @@ export function useInterviewState() {
       setCurrentQuestionIndex(idx);
       setActiveTab('interview');
       const title = (questionBank[idx] || questionOrId)?.title || 'Question';
-      setTranscript(`Answering: ${title}... `);
+      setTranscript('');
       startSession();
     }
   }, [questionBank, startSession]);
@@ -651,16 +612,8 @@ export function useInterviewState() {
   }, [connectWebSocket, wsUrl]);
 
   const appendFollowUpQuestion = useCallback((followUpItem) => {
-    setQuestionBank((prev) => {
-      const updated = [...prev];
-      updated.splice(currentQuestionIndex + 1, 0, {
-        ...followUpItem,
-        id: `followup_${Date.now()}`
-      });
-      return updated;
-    });
-    setCurrentQuestionIndex((prev) => prev + 1);
-  }, [currentQuestionIndex]);
+    // Follow-ups are handled adaptively inside InterviewRoom without inflating the global curriculum bank
+  }, []);
 
   return {
     activeTab,
@@ -698,6 +651,7 @@ export function useInterviewState() {
     startSession,
     pauseSession,
     nextQuestion,
+    prevQuestion,
     endAndAnalyze
   };
 }

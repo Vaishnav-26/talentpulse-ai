@@ -6,17 +6,45 @@ import json
 import asyncio
 import re
 import sqlite3
+import time
 from datetime import datetime
 from typing import Optional, Dict, Any, List
+
+# ── Link Hardened Facial Model Pipeline ──────────────────────────
+FACIAL_MODEL_DIR = "/Users/kanra/Desktop/facial model"
+if FACIAL_MODEL_DIR not in sys.path:
+    sys.path.append(FACIAL_MODEL_DIR)
+
+try:
+    from modules import FacialAnalysisPipeline, PipelineFrameResult
+    HAS_FACIAL_PIPELINE = True
+    print("[+] Loaded FacialAnalysisPipeline from facial model")
+except Exception as _f_err:
+    print(f"[!] Note: FacialAnalysisPipeline fallback: {_f_err}")
+    HAS_FACIAL_PIPELINE = False
 
 import numpy as np
 import cv2
 from PIL import Image
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torchvision import transforms, models
+try:
+    import torch
+    import torch.nn as nn
+    import torch.nn.functional as F
+    from torchvision import transforms, models
+    HAS_TORCH = True
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    img_transforms = transforms.Compose([
+        transforms.Grayscale(num_output_channels=3),
+        transforms.Resize((48, 48)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+except ImportError:
+    torch = None
+    HAS_TORCH = False
+    device = "cpu"
+    img_transforms = None
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File, Form, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,7 +55,7 @@ import pypdf
 # Initialize FastAPI App
 app = FastAPI(
     title="TalentPulse AI - Cognitive Telemetry & LLM Evaluator",
-    description="Real-time emotion telemetry, PyTorch ResNet-18 inference, ATS cross-checker, SQLite persistence & LLM interview engine",
+    description="Real-time emotion telemetry, MediaPipe & PyTorch inference, ATS cross-checker, SQLite persistence & LLM interview engine",
     version="3.5.0"
 )
 
@@ -44,23 +72,28 @@ app.add_middleware(
 # Emotion Classes matching FER-2013 dataset structure
 EMOTION_CLASSES = ['angry', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
 
-# Load Haar Cascade Classifier for Face Detection
-face_cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
-face_cascade = cv2.CascadeClassifier(face_cascade_path)
-
-# PyTorch Image Preprocessing Transforms
-img_transforms = transforms.Compose([
-    transforms.Grayscale(num_output_channels=3),
-    transforms.Resize((48, 48)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-])
-
-# Global PyTorch Model Setup
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# Load Haar Cascade Classifier for Face Detection (Optional Fallback)
+try:
+    face_cascade_path = getattr(cv2, 'data', None) and getattr(cv2.data, 'haarcascades', '') + 'haarcascade_frontalface_default.xml'
+    face_cascade = cv2.CascadeClassifier(face_cascade_path) if hasattr(cv2, 'CascadeClassifier') else None
+except Exception:
+    face_cascade = None
 model = None
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 model_weights_path = os.path.join(BASE_DIR, "fer2013_resnet.pth")
+
+# Hardened Facial Pipeline Singleton
+_facial_pipeline = None
+
+def get_facial_pipeline():
+    global _facial_pipeline
+    if _facial_pipeline is None and HAS_FACIAL_PIPELINE:
+        try:
+            _facial_pipeline = FacialAnalysisPipeline()
+            print("[OK] Initialized hardened MediaPipe 478-Landmark FacialAnalysisPipeline!")
+        except Exception as e:
+            print(f"[!] FacialAnalysisPipeline init error: {e}")
+    return _facial_pipeline
 
 # SQLite Database Setup
 DB_PATH = os.path.join(BASE_DIR, "database.db")
@@ -183,6 +216,9 @@ def init_sqlite_db():
 
 def load_resnet_model():
     global model
+    if not HAS_TORCH:
+        print("[*] Note: PyTorch not installed — using hardened FacialAnalysisPipeline for real-time telemetry.")
+        return
     try:
         model = models.resnet18(weights=None)
         in_features = model.fc.in_features
@@ -271,6 +307,72 @@ async def sync_user_profile(payload: UserSyncRequest):
 
 # Helper to process image frame and extract telemetry metrics
 def process_frame_and_predict(image_bytes: bytes) -> Dict[str, Any]:
+    # ── 1. Attempt Hardened FacialAnalysisPipeline (MediaPipe + Gaze + HeadPose + FACS + XGBoost)
+    pipeline = get_facial_pipeline()
+    if pipeline is not None:
+        try:
+            np_arr = np.frombuffer(image_bytes, np.uint8)
+            frame_bgr = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+            if frame_bgr is not None:
+                t0 = time.perf_counter()
+                result = pipeline.process_frame(frame_bgr)
+                latency_ms = (time.perf_counter() - t0) * 1000.0
+
+                has_face = (result.detection.status == "single_face")
+                eye_contact_score = int(round(result.eye_result.eye_contact_pct)) if result.eye_result else 0
+                eye_contact = bool(eye_contact_score >= 60)
+
+                pitch = round(float(result.head_result.pitch), 1) if result.head_result else 0.0
+                yaw   = round(float(result.head_result.yaw), 1)   if result.head_result else 0.0
+                roll  = round(float(result.head_result.roll), 1)  if result.head_result else 0.0
+
+                # Map FACS Action Unit geometric emotions (0-1) to percentage (0-100)
+                emo = result.emotions or {}
+                emo_neutral = round(float(emo.get("neutral", 0.6)) * 100, 1)
+                emo_happy   = round(float(emo.get("happy", 0.25)) * 100, 1)
+                emo_nervous = round(float(emo.get("fear", 0.0) + emo.get("sad", 0.0) + emo.get("angry", 0.0)) * 100, 1)
+                emo_surprise= round(float(emo.get("surprise", 0.05)) * 100, 1)
+
+                # Determine dominant display label for React UI
+                states = result.states or {}
+                conf_prob = states.get("Confident", 20.0)
+                nerv_prob = states.get("Nervous", 20.0)
+                stres_prob= states.get("Stressed", 20.0)
+                confu_prob= states.get("Confused", 20.0)
+
+                if conf_prob > 35.0 or emo_happy > 40.0:
+                    dominant_display = "Confident / Engaging"
+                elif nerv_prob > 30.0 or stres_prob > 30.0 or emo_nervous > 30.0:
+                    dominant_display = "Anxious / Hesitant"
+                elif confu_prob > 30.0:
+                    dominant_display = "Thoughtful / Puzzled"
+                else:
+                    dominant_display = "Neutral / Composed"
+
+                return {
+                    "has_face": has_face,
+                    "dominant_emotion": dominant_display,
+                    "confidence": round(float(conf_prob) / 100.0, 3),
+                    "eye_contact": eye_contact,
+                    "eye_contact_score": eye_contact_score,
+                    "pitch": pitch,
+                    "yaw": yaw,
+                    "roll": roll,
+                    "latency_ms": round(latency_ms, 1),
+                    "emotions": {
+                        "neutral": emo_neutral,
+                        "happy": emo_happy,
+                        "nervous": emo_nervous,
+                        "surprised": emo_surprise,
+                    },
+                    "behavioral_pattern": result.analysis.get("behavioral_pattern", {}).get("dominant_pattern"),
+                    "behavioral_snapshot": result.snapshot._asdict() if result.snapshot else None,
+                    "full_analysis": result.analysis,
+                }
+        except Exception as e:
+            print(f"[!] FacialAnalysisPipeline execution error: {e}")
+
+    # ── 2. Fallback to ResNet-18 / Haar Cascade if pipeline unavailable
     try:
         pil_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
         img_np = np.array(pil_image)
@@ -375,52 +477,13 @@ async def websocket_telemetry_endpoint(websocket: WebSocket):
 
     try:
         while True:
-            try:
-                data = await asyncio.wait_for(websocket.receive_text(), timeout=0.1)
-                
-                # Check for base64 image frame
-                if data.startswith("data:image") or len(data) > 200:
-                    try:
-                        if "," in data:
-                            base64_data = data.split(",")[1]
-                        else:
-                            base64_data = data
-                        img_bytes = base64.b64decode(base64_data)
-                        metrics = process_frame_and_predict(img_bytes)
-
-                        payload = {
-                            "timestamp": datetime.now().isoformat(),
-                            "dominant_emotion": metrics["dominant_emotion"],
-                            "confidence": metrics["confidence"],
-                            "eye_contact": metrics["eye_contact"],
-                            "eyeContact": metrics["eye_contact_score"],
-                            "dominantEmotion": metrics["dominant_emotion"],
-                            "speechWPM": base_wpm + int(np.random.randint(-4, 5)),
-                            "audioVolume": int(np.random.randint(35, 65)),
-                            "pitchYawRoll": {
-                                "pitch": metrics["pitch"],
-                                "yaw": metrics["yaw"],
-                                "roll": metrics["roll"]
-                            },
-                            "fps": 60,
-                            "latencyMs": int(np.random.randint(8, 16)),
-                            "emotionScores": metrics["emotions"]
-                        }
-                        await websocket.send_json(payload)
-                        continue
-                    except Exception as e:
-                        print(f"[!] Error decoding frame: {e}")
-
-            except asyncio.TimeoutError:
-                pass
-
-            # Heartbeat simulation tick
             eye_drift = int(np.random.choice([-1, 0, 1]))
             current_eye = int(np.clip(base_eye_contact + eye_drift + np.random.randint(-2, 3), 75, 99))
             current_wpm = int(np.clip(base_wpm + np.random.randint(-5, 6), 120, 165))
 
             synthetic_payload = {
                 "timestamp": datetime.now().isoformat(),
+                "has_face": True,
                 "dominant_emotion": "Neutral / Composed",
                 "confidence": 0.92,
                 "eye_contact": current_eye >= 80,
@@ -442,6 +505,82 @@ async def websocket_telemetry_endpoint(websocket: WebSocket):
                     "surprised": round(float(5 + np.random.randint(-2, 2)), 1)
                 }
             }
+
+            try:
+                message = await asyncio.wait_for(websocket.receive(), timeout=0.15)
+                img_bytes = None
+
+                # ── Handle binary image bytes
+                if "bytes" in message and message["bytes"]:
+                    img_bytes = message["bytes"]
+
+                # ── Handle text message (JSON frame or data URL)
+                elif "text" in message and message["text"]:
+                    raw_text = message["text"].strip()
+
+                    # Ping keepalive — send synthetic heartbeat telemetry payload
+                    if raw_text == "ping" or raw_text == '{"type":"ping"}':
+                        await websocket.send_json(synthetic_payload)
+                        continue
+
+                    # Reset session baselines
+                    if raw_text == "reset" or raw_text == '{"type":"reset"}':
+                        pipe = get_facial_pipeline()
+                        if pipe:
+                            pipe.reset_session()
+                        await websocket.send_json({"type": "session_reset", "status": "ok"})
+                        continue
+
+                    # Parse JSON frame wrapper if present
+                    if raw_text.startswith("{") and ("frame" in raw_text or "image" in raw_text):
+                        try:
+                            parsed_json = json.loads(raw_text)
+                            raw_text = parsed_json.get("frame") or parsed_json.get("image") or ""
+                        except Exception:
+                            pass
+
+                    # Strip data:image/...;base64, prefix
+                    if "," in raw_text:
+                        raw_text = raw_text.split(",", 1)[1]
+
+                    if len(raw_text) > 100:
+                        try:
+                            img_bytes = base64.b64decode(raw_text)
+                        except Exception as e:
+                            print(f"[!] Error b64decode frame: {e}")
+
+                if img_bytes is not None:
+                    metrics = await asyncio.to_thread(process_frame_and_predict, img_bytes)
+
+                    payload = {
+                        "timestamp": datetime.now().isoformat(),
+                        "has_face": metrics.get("has_face", True),
+                        "dominant_emotion": metrics["dominant_emotion"],
+                        "confidence": metrics.get("confidence", 0.92),
+                        "eye_contact": metrics["eye_contact"],
+                        "eyeContact": metrics["eye_contact_score"],
+                        "dominantEmotion": metrics["dominant_emotion"],
+                        "speechWPM": base_wpm + int(np.random.randint(-4, 5)),
+                        "audioVolume": int(np.random.randint(35, 65)),
+                        "pitchYawRoll": {
+                            "pitch": metrics["pitch"],
+                            "yaw": metrics["yaw"],
+                            "roll": metrics["roll"]
+                        },
+                        "fps": 60,
+                        "latencyMs": metrics.get("latency_ms", int(np.random.randint(8, 16))),
+                        "emotionScores": metrics["emotions"],
+                        "behavioralPattern": metrics.get("behavioral_pattern"),
+                        "behavioralSnapshot": metrics.get("behavioral_snapshot"),
+                        "fullAnalysis": metrics.get("full_analysis"),
+                    }
+                    await websocket.send_json(payload)
+                    continue
+
+            except asyncio.TimeoutError:
+                pass
+
+            # Heartbeat simulation tick when idle
 
             await websocket.send_json(synthetic_payload)
             await asyncio.sleep(0.35)
@@ -652,7 +791,11 @@ class EvaluateRequest(BaseModel):
 class EvaluateAnswerRequest(BaseModel):
     questionId: Optional[Any] = 1
     questionText: Optional[str] = ""
+    domain: Optional[str] = ""
+    skillsAssessed: Optional[List[str]] = []
+    modelAnswerTip: Optional[str] = ""
     transcript: str
+    isFollowUp: Optional[bool] = False
     rubric: Optional[Dict[str, Any]] = None
     telemetry: Optional[Dict[str, Any]] = None
 
@@ -661,36 +804,143 @@ async def evaluate_candidate_answer(payload: EvaluateAnswerRequest):
     transcript = payload.transcript.strip()
     transcript_lower = transcript.lower()
 
-    # Complexity checks
-    time_terms = ["o(n)", "o(n log n)", "o(log n)", "o(1)", "linear time", "logarithmic", "n log n", "two pointers"]
+    # 1. Fetch Question details from SQLite database if available
+    q_title = ""
+    q_domain = payload.domain or ""
+    q_skills = list(payload.skillsAssessed or [])
+    q_tip = payload.modelAnswerTip or ""
+    q_prompt = payload.questionText or ""
+
+    if payload.questionId:
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM questions WHERE id = ?", (payload.questionId,))
+            row = cursor.fetchone()
+            if row:
+                q_title = row["title"] or ""
+                q_domain = q_domain or row["domain"] or ""
+                q_prompt = q_prompt or row["prompt"] or ""
+                if not q_skills and row["skills_assessed"]:
+                    try:
+                        q_skills = json.loads(row["skills_assessed"])
+                    except:
+                        q_skills = [s.strip() for s in row["skills_assessed"].split(",") if s.strip()]
+                if not q_tip and row["model_answer_tip"]:
+                    q_tip = row["model_answer_tip"]
+            conn.close()
+        except Exception as e:
+            print(f"DB lookup note: {e}")
+
+    # 2. Check for Unknown / Skipped responses
+    unknown_phrases = [
+        "dont know", "don't know", "do not know", "no idea", "not sure",
+        "skip", "pass", "no clue", "dunno", "haven't learned", "haven't covered",
+        "cant answer", "can't answer", "unable to answer", "i forgot", "forgot",
+        "next question", "leave this"
+    ]
+    words = [w for w in re.findall(r"\b[\w'-]+\b", transcript_lower)]
+    word_count = len(words)
+    is_unknown = any(p in transcript_lower for p in unknown_phrases) or (word_count <= 3 and not any(k in transcript_lower for k in ["o(n)", "o(1)", "tree", "hash", "sql", "cache"]))
+
+    if is_unknown:
+        return {
+            "score": 25,
+            "timeComplexityMentioned": False,
+            "spaceComplexityMentioned": False,
+            "isUnknown": True,
+            "matchedSkills": [],
+            "missingSkills": q_skills,
+            "feedback": "Answer marked as unknown or skipped. In a live technical interview, communicate your initial thoughts or ask clarifying questions rather than passing completely.",
+            "evaluationSummary": f"Candidate passed/skipped question (Score: 25%). Model Solution: {q_tip[:140] + '...' if len(q_tip) > 140 else q_tip}",
+            "suggestedAnswer": q_tip or "Review the optimal technical approach for this problem before proceeding.",
+            "followUpPrompt": None
+        }
+
+    # 3. Assess Skills Coverage
+    matched_skills = []
+    missing_skills = []
+    for skill in q_skills:
+        skill_clean = skill.lower()
+        # match full phrase or key words of the skill
+        skill_words = [w for w in re.findall(r"\b\w+\b", skill_clean) if len(w) > 2]
+        if skill_clean in transcript_lower or (skill_words and any(w in transcript_lower for w in skill_words)):
+            matched_skills.append(skill)
+        else:
+            missing_skills.append(skill)
+
+    # 4. Assess Model Answer Key Technical Terms
+    tip_words = [w for w in re.findall(r"\b[a-zA-Z0-9_()]{3,}\b", q_tip.lower()) if w not in {"the", "and", "for", "with", "using", "from", "that", "this", "explain", "optimal"}]
+    matched_tip_terms = [w for w in tip_words if w in transcript_lower]
+    tip_coverage = len(matched_tip_terms) / max(1, len(tip_words))
+
+    # 5. Domain Complexity & Big-O evaluation
+    time_terms = ["o(n)", "o(n log n)", "o(log n)", "o(1)", "linear time", "logarithmic", "n log n", "quadratic", "exponential"]
     has_time = any(t in transcript_lower for t in time_terms)
 
-    space_terms = ["o(1)", "o(n)", "constant space", "auxiliary space", "hash map", "memory trade-off"]
+    space_terms = ["o(1)", "o(n)", "constant space", "auxiliary space", "hash map", "memory trade-off", "in-place"]
     has_space = any(s in transcript_lower for s in space_terms)
 
-    score = 75
-    if has_time:
-        score += 12
-    if has_space:
-        score += 10
-    if len(transcript.split()) > 25:
-        score += 3
-    score = min(98, max(55, score))
-
-    if not has_time:
-        follow_up = "You didn't explicitly quantify Big-O runtime. How does your solution compare to brute-force O(N²)?"
-    elif not has_space:
-        follow_up = "What auxiliary space overhead does your approach incur when scaling to million-element inputs?"
+    # 6. Scoring Calibration
+    base_score = 52
+    if q_skills:
+        skills_ratio = len(matched_skills) / max(1, len(q_skills))
+        base_score += int(skills_ratio * 26)
     else:
-        follow_up = "Great breakdown! How would you handle this algorithm if the input dataset could not fit in RAM?"
+        base_score += 15
 
-    summary = f"Optimal time complexity addressed: {'Yes' if has_time else 'Missing'}. Auxiliary space complexity addressed: {'Yes' if has_space else 'Omitted'}. Pacing and posture remained stable."
-    feedback = f"Structured communication observed. {'Runtime bounds clearly quantified.' if has_time else 'Explicitly articulate Big-O runtime.'} {'Auxiliary memory constraints analyzed.' if has_space else 'Mention memory overhead tradeoffs.'}"
+    base_score += int(min(1.0, tip_coverage * 1.5) * 12)
+
+    if has_time:
+        base_score += 4
+    if has_space:
+        base_score += 4
+
+    if word_count >= 35:
+        base_score += 4
+    elif word_count < 12:
+        base_score -= 10
+
+    score = min(98, max(45, base_score))
+
+    # 7. Constructive Feedback Generation
+    feedback_parts = []
+    if matched_skills:
+        feedback_parts.append(f"Demonstrated solid grasp of key concepts: {', '.join(matched_skills)}.")
+    if missing_skills:
+        feedback_parts.append(f"To deepen your response, discuss: {', '.join(missing_skills)}.")
+    elif q_tip and tip_coverage < 0.4:
+        feedback_parts.append(f"Ensure you address optimal design constraints: {q_tip[:100]}...")
+
+    if not feedback_parts:
+        feedback_parts.append("Comprehensive response addressing key architectural and algorithmic constraints.")
+
+    feedback = " ".join(feedback_parts)
+    summary = f"Skills demonstrated: {len(matched_skills)} of {len(q_skills) or 1} key competencies. Evaluated Score: {score}%."
+
+    # 8. Adaptive Follow-Up (Only on primary round, never recursive)
+    follow_up = None
+    if not payload.isFollowUp:
+        if missing_skills:
+            follow_up = f"You touched on {matched_skills[0] if matched_skills else 'the core idea'}. Can you elaborate on how you would address {missing_skills[0]}?"
+        elif "system design" in q_domain.lower() or "distributed" in q_domain.lower():
+            follow_up = "How would this architecture behave during a network partition or sudden 10x traffic spike?"
+        elif "database" in q_domain.lower() or "sql" in q_domain.lower():
+            follow_up = "How would you handle concurrent writes or lock contention under heavy transactional load?"
+        elif "web" in q_domain.lower() or "frontend" in q_domain.lower():
+            follow_up = "What strategies would you employ to avoid client-side CPU bottlenecks or memory leaks?"
+        elif not has_time:
+            follow_up = "What is the worst-case Big-O runtime of your approach and can it be optimized further?"
+        else:
+            follow_up = "How would your solution scale if the dataset exceeded available system RAM?"
 
     return {
         "score": score,
         "timeComplexityMentioned": has_time,
         "spaceComplexityMentioned": has_space,
+        "isUnknown": False,
+        "matchedSkills": matched_skills,
+        "missingSkills": missing_skills,
         "feedback": feedback,
         "evaluationSummary": summary,
         "followUpPrompt": follow_up
@@ -1068,6 +1318,28 @@ async def enhance_resume_content(payload: EnhanceResumeRequest):
         "action_verbs_applied": ["Architected", "Engineered", "Designed", "Deployed", "Optimized"]
     }
 
+# ================================================================
+# MODULE 2B: FACIAL PIPELINE DIRECT CONTROL ENDPOINTS
+# ================================================================
+@app.get("/api/facial/status")
+async def get_facial_status():
+    pipe = get_facial_pipeline()
+    if pipe is None:
+        return {"status": "inactive", "pipeline": "fallback_resnet"}
+    return {
+        "status": "active",
+        "pipeline": "mediapipe_478_landmarks",
+        "session": pipe.get_session_status()
+    }
+
+@app.post("/api/facial/reset")
+async def reset_facial_session():
+    pipe = get_facial_pipeline()
+    if pipe is None:
+        return {"status": "reset", "pipeline": "fallback_resnet"}
+    status_info = pipe.reset_session()
+    return {"status": "reset", "session": status_info}
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

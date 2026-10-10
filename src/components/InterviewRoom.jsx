@@ -20,7 +20,10 @@ import {
   Check,
   Send,
   AlertTriangle,
-  RefreshCw
+  RefreshCw,
+  MessageSquare,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import ZaraAvatar from './ZaraAvatar';
 
@@ -87,6 +90,7 @@ export default function InterviewRoom({
   onStart,
   onPause,
   onNext,
+  onPrev,
   onEndAndAnalyze,
   onOpenTelemetryDrawer,
   onTranscriptUpdate,
@@ -104,23 +108,64 @@ export default function InterviewRoom({
   const [devicePermissionError, setDevicePermissionError] = useState(null);
   const [isAudioActive, setIsAudioActive] = useState(false);
   const [liveVolumeLevel, setLiveVolumeLevel] = useState(0);
+  const [cameraRequiredToast, setCameraRequiredToast] = useState(null);
 
   // Telemetry & Speech State
   const [showFaceMesh, setShowFaceMesh] = useState(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [ttsEnabled, setTtsEnabled] = useState(true);
-  const [localTranscript, setLocalTranscript] = useState(
-    externalTranscript || 'For a real-time telemetry analysis pipeline, I would leverage WebSockets for low-latency frame streaming, coupled with O(N) memory buffers...'
-  );
-  const [calculatedWpm, setCalculatedWpm] = useState(liveMetrics?.speechWPM || 142);
+  const [localTranscript, setLocalTranscript] = useState(externalTranscript || '');
+  const [calculatedWpm, setCalculatedWpm] = useState(0);
+  const speechRecognitionSupported = typeof window !== 'undefined' && Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
 
   // AI Evaluation & Model Pipeline State
   const [isEvaluating, setIsEvaluating] = useState(false);
+  const [showAnswerHints, setShowAnswerHints] = useState(false);
   const [evaluationResult, setEvaluationResult] = useState(null);
   const [isGeneratingFollowUp, setIsGeneratingFollowUp] = useState(false);
   const [activeFollowUp, setActiveFollowUp] = useState(null);
   const [zaraSpeechBubble, setZaraSpeechBubble] = useState(null);
   const [completedCount, setCompletedCount] = useState(currentQuestionIndex || 0);
+
+  const handleStartInterview = async () => {
+    if (!useWebcam || !isVideoTrackEnabled) {
+      setCameraRequiredToast('Webcam is required to track demeanor and eye gaze. Please enable your camera first.');
+      await startCamera();
+      return;
+    }
+    setCameraRequiredToast(null);
+    onStart();
+  };
+
+  const handlePrevQuestion = () => {
+    setActiveFollowUp(null);
+    setEvaluationResult(null);
+    setZaraSpeechBubble(null);
+    setLocalTranscript('');
+    if (onTranscriptUpdate) onTranscriptUpdate('');
+    if (onPrev) onPrev();
+  };
+  const handleNextQuestion = () => {
+    setActiveFollowUp(null);
+    setEvaluationResult(null);
+    setZaraSpeechBubble(null);
+    setLocalTranscript('');
+    if (onTranscriptUpdate) onTranscriptUpdate('');
+    onNext();
+  };
+
+  // Recalculate WPM dynamically based on actual transcript words and session elapsed time
+  useEffect(() => {
+    if (!localTranscript || !localTranscript.trim()) {
+      setCalculatedWpm(0);
+      return;
+    }
+    const words = localTranscript.trim().split(/\s+/).filter(Boolean);
+    const elapsedMinutes = Math.max(0.12, (sessionTime || 1) / 60);
+    const wpm = Math.min(220, Math.max(0, Math.round(words.length / elapsedMinutes)));
+    setCalculatedWpm(wpm);
+  }, [localTranscript, sessionTime]);
+
 
   // Safe question fallback: guarantees Question Card is never blank or collapsed
   const activeQuestionItem = activeFollowUp || (currentQuestion && currentQuestion.prompt ? currentQuestion : DEFAULT_QUESTION);
@@ -130,14 +175,22 @@ export default function InterviewRoom({
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
 
-  // Sync external transcript if provided
+  // Reset answer when moving to a new question
   useEffect(() => {
-    if (externalTranscript && externalTranscript !== localTranscript) {
-      setLocalTranscript(externalTranscript);
-    }
-  }, [externalTranscript]);
+    setLocalTranscript('');
+    if (onTranscriptUpdate) onTranscriptUpdate('');
+  }, [currentQuestionIndex, activeQuestionItem?.id]);
 
   // Derive dynamic audio status for Zara avatar sound wave: 'speaking' | 'listening' | 'analyzing' | 'ready'
+  // Real-time focus loss detection during active recording
+  const isFocusLost = Boolean(
+    isRecording &&
+    !isPaused &&
+    useWebcam &&
+    isVideoTrackEnabled &&
+    (liveMetrics?.has_face === false || (liveMetrics?.eyeContact !== undefined && liveMetrics.eyeContact < 65))
+  );
+
   const audioStatus = isEvaluating 
     ? 'analyzing'
     : isSpeaking 
@@ -193,43 +246,62 @@ export default function InterviewRoom({
   const startCamera = useCallback(async () => {
     setDevicePermissionError(null);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 1280, height: 720 },
-        audio: true
-      });
+      let stream = null;
+      // 1. Try video + audio with ideal constraints
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+          audio: true
+        });
+      } catch (errAudioVideo) {
+        console.warn('Video+audio getUserMedia failed, trying video-only fallback:', errAudioVideo);
+        // 2. Fallback to video only if audio permission/device is locked
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false
+        });
+      }
+
+      if (!stream) {
+        throw new Error('No media stream returned from camera');
+      }
 
       streamRef.current = stream;
       setUseWebcam(true);
       setIsVideoTrackEnabled(true);
+      setDevicePermissionError(null);
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.play().catch((err) => console.warn('Video play caught:', err));
       }
 
-      // Initialize Web Audio API Analyser for live speech level detection
+      // Initialize Web Audio API Analyser if audio track exists
       try {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (AudioContextClass) {
-          const audioCtx = new AudioContextClass();
-          audioContextRef.current = audioCtx;
-          const source = audioCtx.createMediaStreamSource(stream);
-          const analyser = audioCtx.createAnalyser();
-          analyser.fftSize = 64;
-          source.connect(analyser);
+        const audioTracks = stream.getAudioTracks();
+        if (audioTracks.length > 0) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            const audioCtx = new AudioContextClass();
+            audioContextRef.current = audioCtx;
+            const source = audioCtx.createMediaStreamSource(stream);
+            const analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 64;
+            source.connect(analyser);
 
-          const dataArray = new Uint8Array(analyser.frequencyBinCount);
-          const checkVolume = () => {
-            if (!streamRef.current) return;
-            analyser.getByteFrequencyData(dataArray);
-            let sum = 0;
-            for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
-            const avg = sum / dataArray.length;
-            setLiveVolumeLevel(avg);
-            setIsAudioActive(avg > 12);
-            requestAnimationFrame(checkVolume);
-          };
-          checkVolume();
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            const checkVolume = () => {
+              if (!streamRef.current) return;
+              analyser.getByteFrequencyData(dataArray);
+              let sum = 0;
+              for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+              const avg = sum / dataArray.length;
+              setLiveVolumeLevel(avg);
+              setIsAudioActive(avg > 12);
+              requestAnimationFrame(checkVolume);
+            };
+            checkVolume();
+          }
         }
       } catch (e) {
         console.warn('AudioContext init note:', e);
@@ -237,10 +309,36 @@ export default function InterviewRoom({
 
     } catch (err) {
       console.warn('Camera access denied or unavailable:', err);
-      setDevicePermissionError('Camera access blocked. Please enable camera and microphone permissions in your browser bar.');
+      const isBlocked = err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError';
+      const msg = isBlocked
+        ? 'Camera access blocked. Please click the camera icon in your address bar, click Allow, then click Retry.'
+        : `Camera error (${err.name || 'Unavailable'}). Check if another app is using the webcam.`;
+      setDevicePermissionError(msg);
       setUseWebcam(false);
     }
   }, []);
+
+  // Stream live webcam frames to WebSocket telemetry pipeline
+  useEffect(() => {
+    if (useWebcam && isVideoTrackEnabled) {
+      const offscreenCanvas = document.createElement('canvas');
+      offscreenCanvas.width = 320;
+      offscreenCanvas.height = 240;
+      const ctx = offscreenCanvas.getContext('2d');
+
+      const interval = setInterval(() => {
+        if (videoRef.current && videoRef.current.readyState >= 2) {
+          ctx.drawImage(videoRef.current, 0, 0, 320, 240);
+          const b64 = offscreenCanvas.toDataURL('image/jpeg', 0.6);
+          if (window.CognitiveLab?.sendFrame) {
+            window.CognitiveLab.sendFrame(b64);
+          }
+        }
+      }, 200);
+
+      return () => clearInterval(interval);
+    }
+  }, [useWebcam, isVideoTrackEnabled]);
 
   // Re-attach video stream if element re-renders
   useEffect(() => {
@@ -269,12 +367,16 @@ export default function InterviewRoom({
       startCamera();
       return;
     }
-    const videoTracks = streamRef.current.getVideoTracks();
-    if (videoTracks.length > 0) {
-      const nextState = !isVideoTrackEnabled;
-      videoTracks.forEach((t) => (t.enabled = nextState));
-      setIsVideoTrackEnabled(nextState);
+    // If currently running, stop video stream completely to turn off camera hardware
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
     }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setUseWebcam(false);
+    setIsVideoTrackEnabled(false);
   };
 
   // Toggle Audio Track dynamically
@@ -398,13 +500,17 @@ export default function InterviewRoom({
     setIsEvaluating(true);
 
     const payload = {
-      questionId: activeQuestionItem.id || 1,
+      questionId: activeQuestionItem.id || (currentQuestionIndex + 1),
       questionText: activeQuestionItem.prompt,
+      domain: activeQuestionItem.domain || 'DSA & Algorithms',
+      skillsAssessed: activeQuestionItem.skillsAssessed || [],
+      modelAnswerTip: activeQuestionItem.modelAnswerTip || '',
+      isFollowUp: Boolean(activeFollowUp),
       transcript: localTranscript,
       rubric: {
         optimalTime: 'O(N) / O(N log N)',
         auxiliarySpace: 'O(1)',
-        keyConcepts: activeQuestionItem.skillsAssessed || ['Two Pointers', 'Hash Map', 'Sorting overhead', 'Space trade-off']
+        keyConcepts: activeQuestionItem.skillsAssessed || []
       },
       telemetry: {
         eyeFocusAvg: liveMetrics?.eyeContact || 94,
@@ -430,21 +536,40 @@ export default function InterviewRoom({
       console.warn('Backend model endpoint offline, using intelligent client-side fallback evaluation:', err);
       // Resilient local fallback evaluation
       const transcriptLower = localTranscript.toLowerCase();
+      const unknownPhrases = [
+        "dont know", "don't know", "do not know", "no idea", "not sure",
+        "skip", "pass", "no clue", "dunno", "cant answer", "can't answer"
+      ];
       const hasTime = ['o(n)', 'o(n log n)', 'o(1)', 'linear time', 'n log n'].some((t) => transcriptLower.includes(t));
       const hasSpace = ['o(1)', 'o(n)', 'constant space', 'auxiliary space'].some((s) => transcriptLower.includes(s));
+      const isUnknown = unknownPhrases.some((p) => transcriptLower.includes(p)) || (transcriptLower.trim().split(/\s+/).length <= 2 && !hasTime && !hasSpace);
 
-      const fallbackData = {
-        score: hasTime && hasSpace ? 92 : hasTime || hasSpace ? 82 : 72,
-        timeComplexityMentioned: hasTime,
-        spaceComplexityMentioned: hasSpace,
-        feedback: hasTime && hasSpace
-          ? 'Exceptional technical depth. Both runtime bounds O(N) and auxiliary memory trade-offs O(1) were articulated with precision.'
-          : 'Solid conceptual answer. Ensure you explicitly qualify whether auxiliary storage is constant O(1) or linear O(N).',
-        evaluationSummary: `Optimal time complexity: ${hasTime ? 'Satisfied' : 'Needs Mention'}. Auxiliary space complexity: ${hasSpace ? 'Satisfied' : 'Omitted'}. Pacing maintained at ${calculatedWpm} WPM.`,
-        followUpPrompt: !hasTime
-          ? 'How would your algorithm scale if the array was unsorted and required O(N log N) preprocessing?'
-          : 'Can you elaborate on how you would handle this if input stream chunks arrived concurrently via WebSockets?'
-      };
+      let fallbackData;
+      if (isUnknown) {
+        fallbackData = {
+          score: 30,
+          timeComplexityMentioned: false,
+          spaceComplexityMentioned: false,
+          isUnknown: true,
+          feedback: "Answer marked as unknown or skipped. In technical interviews, articulate your initial brute-force thoughts or ask clarifying questions rather than passing.",
+          evaluationSummary: "Candidate marked question as unknown / skipped (Score: 30%). Review the model answer and advance to the next challenge.",
+          followUpPrompt: null
+        };
+      } else {
+        fallbackData = {
+          score: hasTime && hasSpace ? 92 : hasTime || hasSpace ? 82 : 70,
+          timeComplexityMentioned: hasTime,
+          spaceComplexityMentioned: hasSpace,
+          isUnknown: false,
+          feedback: hasTime && hasSpace
+            ? 'Exceptional technical depth. Both runtime bounds O(N) and auxiliary memory trade-offs O(1) were articulated with precision.'
+            : 'Solid conceptual answer. Ensure you explicitly qualify whether auxiliary storage is constant O(1) or linear O(N).',
+          evaluationSummary: `Optimal time complexity: ${hasTime ? 'Satisfied' : 'Needs Mention'}. Auxiliary space complexity: ${hasSpace ? 'Satisfied' : 'Omitted'}.`,
+          followUpPrompt: activeFollowUp ? null : (!hasTime
+            ? 'How would your algorithm scale if the array was unsorted and required O(N log N) preprocessing?'
+            : 'Can you elaborate on how you would handle this if input stream chunks arrived concurrently via WebSockets?')
+        };
+      }
       applyEvaluationSuccess(fallbackData);
     } finally {
       setIsEvaluating(false);
@@ -455,13 +580,14 @@ export default function InterviewRoom({
     setEvaluationResult(data);
     setCompletedCount((prev) => Math.min(totalQuestions, prev + 1));
 
-    if (data.followUpPrompt) {
+    // Only trigger a follow-up if primary round, data has follow-up prompt, and user didn't mark unknown
+    if (data.followUpPrompt && !activeFollowUp && !data.isUnknown) {
       setZaraSpeechBubble(data.followUpPrompt);
       speakText(data.followUpPrompt);
 
       const followUpObj = {
         id: `followup_${Date.now()}`,
-        title: 'Adaptive Follow-Up: Scalability',
+        title: 'Adaptive Follow-Up: Complexity & Scaling',
         domain: activeQuestionItem.domain || 'DSA & Algorithms',
         category: 'Adaptive AI Follow-Up',
         difficulty: 'Hard',
@@ -470,8 +596,10 @@ export default function InterviewRoom({
         isFollowUp: true
       };
       setActiveFollowUp(followUpObj);
-      if (onAppendFollowUpQuestion) {
-        onAppendFollowUpQuestion(followUpObj);
+    } else {
+      setActiveFollowUp(null);
+      if (data.feedback) {
+        setZaraSpeechBubble(data.feedback);
       }
     }
   };
@@ -503,9 +631,30 @@ export default function InterviewRoom({
           {/* Top Row: Muted pastel badges & Monospaced Timer in top-right */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2.5 py-1 text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 rounded-lg">
-                {activeFollowUp ? 'Follow-Up Round' : `Question ${currentQuestionIndex + 1} of ${totalQuestions}`}
-              </span>
+              {/* Question Navigator */}
+              <div className="inline-flex items-center bg-slate-100 border border-slate-200 rounded-lg p-0.5 shadow-2xs">
+                <button
+                  type="button"
+                  onClick={handlePrevQuestion}
+                  disabled={currentQuestionIndex <= 0}
+                  className="p-1 rounded hover:bg-white text-slate-600 disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
+                  title="Previous Question"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+                <span className="px-2 py-0.5 text-xs font-semibold text-slate-800 tracking-tight">
+                  {activeFollowUp ? 'Follow-Up Round' : `Question ${currentQuestionIndex + 1} of ${totalQuestions}`}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleNextQuestion}
+                  disabled={currentQuestionIndex >= totalQuestions - 1}
+                  className="p-1 rounded hover:bg-white text-slate-600 disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
+                  title="Next Question"
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
 
               <span className="px-2.5 py-1 text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/70 rounded-lg">
                 {activeQuestionItem.domain || 'DSA & Algorithms'}
@@ -581,6 +730,17 @@ export default function InterviewRoom({
                   </>
                 )}
               </button>
+
+              <button
+                type="button"
+                onClick={handleNextQuestion}
+                disabled={currentQuestionIndex >= totalQuestions - 1}
+                className="h-9 inline-flex items-center justify-center gap-1.5 px-3.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors shadow-2xs cursor-pointer leading-none disabled:opacity-40"
+                title="Skip or proceed to next question"
+              >
+                <span>Next</span>
+                <SkipForward className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+              </button>
             </div>
 
           </div>
@@ -588,7 +748,23 @@ export default function InterviewRoom({
         </div>
 
         {/* 2. Candidate Video Viewport (Directly beneath Question Card) */}
-        <div className="relative w-full aspect-video max-h-[350px] sm:max-h-[380px] xl:max-h-[410px] rounded-2xl overflow-hidden bg-slate-900 border border-slate-200 shadow-sm group">
+        <div className={`relative w-full aspect-video max-h-[350px] sm:max-h-[380px] xl:max-h-[410px] rounded-2xl overflow-hidden bg-slate-900 border shadow-sm group transition-all duration-300 ${
+          isFocusLost 
+            ? 'ring-4 ring-rose-500 shadow-rose-500/25 border-rose-400' 
+            : 'border-slate-200'
+        }`}>
+
+          {/* Real-time Focus Loss Floating Warning */}
+          {isFocusLost && (
+            <div className="absolute top-12 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-xl bg-rose-600/95 text-white text-xs font-bold backdrop-blur-md shadow-2xl flex items-center gap-2 border border-rose-300 animate-pulse pointer-events-none">
+              <AlertTriangle className="w-4 h-4 text-amber-200 shrink-0" />
+              <span>
+                {liveMetrics?.has_face === false 
+                  ? "⚠️ Face Not Detected — Re-align yourself in center frame" 
+                  : `⚠️ Eye Contact Warning (${liveMetrics.eyeContact}% Focus) — Look directly into the camera lens`}
+              </span>
+            </div>
+          )}
 
           {/* Hardware Error Prompt Banner */}
           {devicePermissionError && (
@@ -645,10 +821,22 @@ export default function InterviewRoom({
             className="absolute inset-0 w-full h-full pointer-events-none z-10"
           />
 
-          {/* Minimal Floating Frosted-Glass Badge: "94% Focus" (Top-Left) */}
+          {/* Minimal Floating Frosted-Glass Badge: Focus status (Top-Left) */}
           <div className="absolute top-3.5 left-3.5 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-md border border-white/60 shadow-xs text-xs font-medium text-slate-800">
-            <span className={`w-2 h-2 rounded-full ${liveMetrics?.eyeContact >= 80 ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-            <span className="font-semibold text-slate-900">{liveMetrics?.eyeContact || 94}% Focus</span>
+            <span className={`w-2 h-2 rounded-full ${
+              (!useWebcam || !isVideoTrackEnabled)
+                ? 'bg-slate-400'
+                : (liveMetrics?.has_face === false)
+                  ? 'bg-rose-500 animate-pulse'
+                  : (liveMetrics?.eyeContact >= 80 ? 'bg-emerald-500' : 'bg-amber-500')
+            }`} />
+            <span className="font-semibold text-slate-900">
+              {(!useWebcam || !isVideoTrackEnabled)
+                ? 'Camera Offline'
+                : (liveMetrics?.has_face === false)
+                  ? 'No Face Detected'
+                  : `${liveMetrics?.eyeContact ?? 0}% Focus`}
+            </span>
           </div>
 
           {/* Real-time Subtitle/Caption Box right above bottom dock */}
@@ -656,7 +844,7 @@ export default function InterviewRoom({
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-950/80 backdrop-blur-md text-white/95 text-xs font-sans shadow-md border border-white/10 max-w-full">
               <span className={`w-2 h-2 rounded-full shrink-0 ${isAudioActive && !isMuted ? 'bg-emerald-400 animate-ping' : 'bg-slate-400'}`} />
               <span className="line-clamp-2 italic">
-                "{localTranscript || 'Listening for candidate speech input...'}"
+                "{localTranscript || (isRecording ? 'Listening for candidate speech input or type below...' : 'Start interview to speak or type response below...')}"
               </span>
             </div>
           </div>
@@ -710,22 +898,188 @@ export default function InterviewRoom({
 
         </div>
 
-        {/* 3. Live Metrics Overview */}
+        {/* 3. Candidate Response & Transcription Workspace */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                <MessageSquare className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Candidate Response</h3>
+                <p className="text-[11px] text-slate-500">
+                  Speak aloud into your microphone or type your response below
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {speechRecognitionSupported ? (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className={`w-1.5 h-1.5 rounded-full ${isRecording && !isMuted ? "bg-emerald-500 animate-ping" : "bg-slate-400"}`} />
+                  {isRecording ? (isMuted ? 'Mic Muted' : 'Speech Active') : 'Speech Ready'}
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200" title="Firefox does not support SpeechRecognition by default">
+                  ⌨️ Keyboard Mode (Type Response Below)
+                </span>
+              )}
+              <span className="text-xs font-mono text-slate-400">
+                {localTranscript ? localTranscript.trim().split(/\s+/).filter(Boolean).length : 0} words
+              </span>
+            </div>
+          </div>
+
+          {/* Live Multi-Domain Evaluation Banner */}
+          {evaluationResult && (
+            <div className={`p-3.5 rounded-xl border space-y-2.5 animate-fadeIn ${
+              evaluationResult.isUnknown
+                ? 'bg-amber-50/95 border-amber-200 text-amber-950'
+                : 'bg-emerald-50/95 border-emerald-200 text-emerald-950'
+            }`}>
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className={`w-4 h-4 shrink-0 ${evaluationResult.isUnknown ? 'text-amber-600' : 'text-emerald-600'}`} />
+                  <span className="text-xs font-bold uppercase tracking-wide">
+                    {evaluationResult.isUnknown ? 'Question Skipped' : `Evaluation Score: ${evaluationResult.score}%`}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleNextQuestion}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs cursor-pointer ml-auto shrink-0"
+                >
+                  <span>Proceed to Next Question</span>
+                  <SkipForward className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <p className="text-xs font-medium leading-relaxed">
+                {evaluationResult.feedback}
+              </p>
+
+              {evaluationResult.matchedSkills && evaluationResult.matchedSkills.length > 0 && (
+                <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                  <span className="text-[11px] font-semibold text-emerald-700">Concepts Mastered:</span>
+                  {evaluationResult.matchedSkills.map((s, idx) => (
+                    <span key={idx} className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100/90 text-emerald-800 border border-emerald-300">
+                      ✓ {s}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {evaluationResult.missingSkills && evaluationResult.missingSkills.length > 0 && (
+                <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                  <span className="text-[11px] font-semibold text-amber-700">Recommended to cover:</span>
+                  {evaluationResult.missingSkills.map((s, idx) => (
+                    <span key={idx} className="px-2 py-0.5 rounded text-[10px] font-medium bg-amber-100/90 text-amber-800 border border-amber-300">
+                      • {s}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="relative">
+            <textarea
+              value={localTranscript}
+              onChange={(e) => {
+                setLocalTranscript(e.target.value);
+                if (onTranscriptUpdate) onTranscriptUpdate(e.target.value);
+              }}
+              placeholder="Type your answer here or speak aloud into your microphone. Be sure to explain your approach and state time complexity (e.g., O(N)) and space complexity (e.g., O(1))..."
+              rows={3}
+              className="w-full p-3.5 text-xs sm:text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400 leading-relaxed resize-y min-h-[90px]"
+            />
+          </div>
+
+          <div className="flex items-center justify-between flex-wrap gap-2 pt-1">
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+              <span>AI grades algorithmic logic, O(N) runtime accuracy, and constant O(1) space.</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {localTranscript && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocalTranscript('');
+                    if (onTranscriptUpdate) onTranscriptUpdate('');
+                  }}
+                  className="px-2.5 py-1.5 text-xs text-slate-500 hover:text-slate-700 font-medium cursor-pointer"
+                >
+                  Clear
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleSubmitAnswer}
+                disabled={isEvaluating || !localTranscript.trim()}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+              >
+                {isEvaluating ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Evaluating Response...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Submit Answer</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleNextQuestion}
+                disabled={currentQuestionIndex >= totalQuestions - 1}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors cursor-pointer disabled:opacity-40"
+                title="Proceed to next question"
+              >
+                <span>Next Question</span>
+                <SkipForward className="w-3.5 h-3.5 text-slate-500" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* 4. Live Metrics Overview */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
           {/* Metric 1: Eye Contact */}
           <div className="bg-white rounded-xl border border-slate-200 p-3.5 shadow-xs flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-9 h-9 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                useWebcam && isVideoTrackEnabled ? 'bg-indigo-50 border border-indigo-100 text-indigo-600' : 'bg-slate-100 border border-slate-200 text-slate-400'
+              }`}>
                 <Eye className="w-4.5 h-4.5" />
               </div>
               <div>
                 <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Eye Focus</p>
                 <div className="flex items-baseline space-x-1.5">
-                  <span className="text-lg font-bold text-slate-900">{liveMetrics?.eyeContact || 94}%</span>
-                  <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    Optimal
-                  </span>
+                  {useWebcam && isVideoTrackEnabled ? (
+                    <>
+                      <span className="text-lg font-bold text-slate-900">{liveMetrics?.eyeContact ?? 0}%</span>
+                      <span className={`text-[10px] font-semibold px-1.5 py-0.2 rounded border ${
+                        liveMetrics?.eyeContact >= 80 
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                          : 'bg-amber-50 text-amber-700 border-amber-200'
+                      }`}>
+                        {liveMetrics?.eyeContact >= 80 ? 'Optimal' : 'Low'}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-lg font-bold text-slate-400">--%</span>
+                      <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 border border-slate-200">
+                        Offline
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -734,18 +1088,31 @@ export default function InterviewRoom({
           {/* Metric 2: Dominant Emotion */}
           <div className="bg-white rounded-xl border border-slate-200 p-3.5 shadow-xs flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-9 h-9 rounded-lg bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-700">
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                useWebcam && isVideoTrackEnabled ? 'bg-slate-100 border border-slate-200/80 text-slate-700' : 'bg-slate-50 border border-slate-200 text-slate-400'
+              }`}>
                 <Smile className="w-4.5 h-4.5" />
               </div>
               <div>
                 <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Emotion</p>
                 <div className="flex items-baseline space-x-1.5">
-                  <span className="text-sm font-bold text-slate-900 truncate max-w-[100px]">
-                    {liveMetrics?.dominantEmotion || 'Confident'}
-                  </span>
-                  <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200">
-                    92%
-                  </span>
+                  {useWebcam && isVideoTrackEnabled ? (
+                    <>
+                      <span className="text-sm font-bold text-slate-900 truncate max-w-[100px]">
+                        {liveMetrics?.dominantEmotion || 'Neutral'}
+                      </span>
+                      <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Live
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-sm font-bold text-slate-400">Camera Off</span>
+                      <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 border border-slate-200">
+                        Standby
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -760,8 +1127,20 @@ export default function InterviewRoom({
               <div>
                 <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Vocal Pacing</p>
                 <div className="flex items-baseline space-x-1">
-                  <span className="text-lg font-bold text-slate-900">{calculatedWpm}</span>
-                  <span className="text-xs text-slate-500 font-mono">WPM</span>
+                  {isRecording && calculatedWpm > 0 ? (
+                    <>
+                      <span className="text-lg font-bold text-slate-900">{calculatedWpm}</span>
+                      <span className="text-xs text-slate-500 font-mono">WPM</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-lg font-bold text-slate-400">0</span>
+                      <span className="text-xs text-slate-400 font-mono">WPM</span>
+                      <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 border border-slate-200 ml-1">
+                        {isRecording ? 'Silent' : 'Standby'}
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -789,14 +1168,34 @@ export default function InterviewRoom({
         <div className="bg-white rounded-2xl border border-slate-200 p-3.5 flex flex-wrap items-center justify-between gap-3 shadow-xs">
           
           <div className="flex items-center space-x-2 flex-wrap">
+            {cameraRequiredToast && (
+              <div className="w-full mb-1 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center justify-between gap-2 animate-fadeIn">
+                <span className="font-medium">{cameraRequiredToast}</span>
+                <button onClick={() => setCameraRequiredToast(null)} className="text-amber-600 hover:text-amber-800 text-xs font-bold">×</button>
+              </div>
+            )}
             {!isRecording ? (
               <button
                 type="button"
-                onClick={onStart}
-                className="flex items-center space-x-2 px-4.5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer"
+                onClick={handleStartInterview}
+                className={`flex items-center space-x-2 px-4.5 py-2.5 rounded-xl font-semibold text-xs shadow-xs transition-all cursor-pointer ${
+                  useWebcam && isVideoTrackEnabled
+                    ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                    : 'bg-amber-600 hover:bg-amber-700 text-white ring-2 ring-amber-400/50'
+                }`}
+                title={useWebcam && isVideoTrackEnabled ? 'Start interview session' : 'Camera must be turned on to begin'}
               >
-                <Play className="w-3.5 h-3.5 fill-white" />
-                <span>Start Interview</span>
+                {useWebcam && isVideoTrackEnabled ? (
+                  <>
+                    <Play className="w-3.5 h-3.5 fill-white" />
+                    <span>Start Interview</span>
+                  </>
+                ) : (
+                  <>
+                    <Video className="w-3.5 h-3.5" />
+                    <span>Turn On Camera to Start</span>
+                  </>
+                )}
               </button>
             ) : (
               <button
@@ -824,13 +1223,8 @@ export default function InterviewRoom({
 
             <button
               type="button"
-              onClick={() => {
-                setActiveFollowUp(null);
-                setEvaluationResult(null);
-                setZaraSpeechBubble(null);
-                onNext();
-              }}
-              disabled={!isRecording || currentQuestionIndex >= totalQuestions - 1}
+              onClick={handleNextQuestion}
+              disabled={currentQuestionIndex >= totalQuestions - 1}
               className="flex items-center space-x-2 px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs transition-colors disabled:opacity-40 disabled:pointer-events-none shadow-2xs cursor-pointer"
             >
               <span>Next Question</span>

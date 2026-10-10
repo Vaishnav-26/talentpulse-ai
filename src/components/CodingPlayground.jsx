@@ -49,7 +49,7 @@ You may assume that each input would have exactly one solution, and you may not 
     ],
     starterCode: {
       python: `def twoSum(nums: list[int], target: int) -> list[int]:
-    # Hash map to store complement and index
+    # Hash map: O(N) time, O(N) space
     seen = {}
     for i, num in enumerate(nums):
         complement = target - num
@@ -77,6 +77,105 @@ print("Result 2:", twoSum([3, 2, 4], 6))
 // Test execution
 console.log("Result 1:", twoSum([2, 7, 11, 15], 9));
 console.log("Result 2:", twoSum([3, 2, 4], 6));
+`,
+      typescript: `function twoSum(nums: number[], target: number): number[] {
+    const seen = new Map<number, number>();
+    for (let i = 0; i < nums.length; i++) {
+        const complement = target - nums[i];
+        if (seen.has(complement)) {
+            return [seen.get(complement)!, i];
+        }
+        seen.set(nums[i], i);
+    }
+    return [];
+}
+
+console.log("Result 1:", twoSum([2, 7, 11, 15], 9));
+console.log("Result 2:", twoSum([3, 2, 4], 6));
+`,
+      java: `import java.util.*;
+
+public class Solution {
+    public static int[] twoSum(int[] nums, int target) {
+        Map<Integer, Integer> seen = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            int complement = target - nums[i];
+            if (seen.containsKey(complement)) {
+                return new int[]{ seen.get(complement), i };
+            }
+            seen.put(nums[i], i);
+        }
+        return new int[]{};
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Result 1: " + Arrays.toString(twoSum(new int[]{2, 7, 11, 15}, 9)));
+        System.out.println("Result 2: " + Arrays.toString(twoSum(new int[]{3, 2, 4}, 6)));
+    }
+}
+`,
+      cpp: `#include <iostream>
+#include <vector>
+#include <unordered_map>
+
+std::vector<int> twoSum(const std::vector<int>& nums, int target) {
+    std::unordered_map<int, int> seen;
+    for (int i = 0; i < (int)nums.size(); ++i) {
+        int complement = target - nums[i];
+        if (seen.find(complement) != seen.end()) {
+            return { seen[complement], i };
+        }
+        seen[nums[i]] = i;
+    }
+    return {};
+}
+
+int main() {
+    auto res1 = twoSum({2, 7, 11, 15}, 9);
+    std::cout << "Result 1: [" << res1[0] << ", " << res1[1] << "]
+";
+    return 0;
+}
+`,
+      go: `package main
+
+import "fmt"
+
+func twoSum(nums []int, target int) []int {
+    seen := make(map[int]int)
+    for i, num := range nums {
+        complement := target - num
+        if idx, ok := seen[complement]; ok {
+            return []int{idx, i}
+        }
+        seen[num] = i
+    }
+    return nil
+}
+
+func main() {
+    fmt.Println("Result 1:", twoSum([]int{2, 7, 11, 15}, 9))
+    fmt.Println("Result 2:", twoSum([]int{3, 2, 4}, 6))
+}
+`,
+      rust: `use std::collections::HashMap;
+
+pub fn two_sum(nums: &[i32], target: i32) -> Vec<usize> {
+    let mut seen = HashMap::new();
+    for (i, &num) in nums.iter().enumerate() {
+        let complement = target - num;
+        if let Some(&idx) = seen.get(&complement) {
+            return vec![idx, i];
+        }
+        seen.insert(num, i);
+    }
+    vec![]
+}
+
+fn main() {
+    println!("Result 1: {:?}", two_sum(&[2, 7, 11, 15], 9));
+    println!("Result 2: {:?}", two_sum(&[3, 2, 4], 6));
+}
 `
     },
     testCases: [
@@ -122,7 +221,7 @@ An input string is valid if:
     starterCode: {
       python: `def isValid(s: str) -> bool:
     stack = []
-    mapping = {')': '(', '}': '{', ']': '['}
+    mapping = {")": "(", "}": "{", "]": "["}
     for char in s:
         if char in mapping:
             top = stack.pop() if stack else '#'
@@ -137,11 +236,10 @@ print("Result 2:", isValid("(]"))
 `,
       javascript: `function isValid(s) {
     const stack = [];
-    const mapping = { ')': '(', '}': '{', ']': '[' };
-    for (let char of s) {
-        if (mapping[char]) {
-            const top = stack.length ? stack.pop() : '#';
-            if (mapping[char] !== top) return false;
+    const map = { ')': '(', '}': '{', ']': '[' };
+    for (const char of s) {
+        if (map[char]) {
+            if (stack.pop() !== map[char]) return false;
         } else {
             stack.push(char);
         }
@@ -151,6 +249,117 @@ print("Result 2:", isValid("(]"))
 
 console.log("Result 1:", isValid("()[]{}"));
 console.log("Result 2:", isValid("(]"));
+`,
+      typescript: `function isValid(s: string): boolean {
+    const stack: string[] = [];
+    const map: Record<string, string> = { ')': '(', '}': '{', ']': '[' };
+    for (const char of s) {
+        if (map[char]) {
+            if (stack.pop() !== map[char]) return false;
+        } else {
+            stack.push(char);
+        }
+    }
+    return stack.length === 0;
+}
+
+console.log("Result 1:", isValid("()[]{}"));
+console.log("Result 2:", isValid("(]"));
+`,
+      java: `import java.util.*;
+
+public class Solution {
+    public static boolean isValid(String s) {
+        Deque<Character> stack = new ArrayDeque<>();
+        for (char c : s.toCharArray()) {
+            if (c == '(') stack.push(')');
+            else if (c == '{') stack.push('}');
+            else if (c == '[') stack.push(']');
+            else if (stack.isEmpty() || stack.pop() != c) return false;
+        }
+        return stack.isEmpty();
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Result 1: " + isValid("()[]{}"));
+        System.out.println("Result 2: " + isValid("(]"));
+    }
+}
+`,
+      cpp: `#include <iostream>
+#include <string>
+#include <stack>
+
+bool isValid(const std::string& s) {
+    std::stack<char> st;
+    for (char c : s) {
+        if (c == '(') st.push(')');
+        else if (c == '{') st.push('}');
+        else if (c == '[') st.push(']');
+        else {
+            if (st.empty() || st.top() != c) return false;
+            st.pop();
+        }
+    }
+    return st.empty();
+}
+
+int main() {
+    std::cout << std::boolalpha;
+    std::cout << "Result 1: " << isValid("()[]{}") << "
+";
+    std::cout << "Result 2: " << isValid("(]") << "
+";
+    return 0;
+}
+`,
+      go: `package main
+
+import "fmt"
+
+func isValid(s string) bool {
+    var stack []rune
+    pairs := map[rune]rune{')': '(', '}': '{', ']': '['}
+    for _, ch := range s {
+        if open, exists := pairs[ch]; exists {
+            if len(stack) == 0 || stack[len(stack)-1] != open {
+                return false
+            }
+            stack = stack[:len(stack)-1]
+        } else {
+            stack = append(stack, ch)
+        }
+    }
+    return len(stack) == 0
+}
+
+func main() {
+    fmt.Println("Result 1:", isValid("()[]{}"))
+    fmt.Println("Result 2:", isValid("(]"))
+}
+`,
+      rust: `pub fn is_valid(s: &str) -> bool {
+    let mut stack = Vec::new();
+    for c in s.chars() {
+        match c {
+            '(' => stack.push(')'),
+            '{' => stack.push('}'),
+            '[' => stack.push(']'),
+            ')' | '}' | ']' => {
+                if stack.pop() != Some(c) {
+                    return false;
+                }
+            }
+            _ => {}
+        }
+    }
+    stack.is_empty()
+}
+
+fn main() {
+    println!("Result 1: {}", is_valid("()[]{}"));
+    println!("Result 2: {}", is_valid("(]"));
+}
 `
     },
     testCases: [
@@ -186,8 +395,8 @@ console.log("Result 2:", isValid("(]"));
     starterCode: {
       python: `def lengthOfLongestSubstring(s: str) -> int:
     char_map = {}
-    left = 0
     max_len = 0
+    left = 0
     for right, char in enumerate(s):
         if char in char_map and char_map[char] >= left:
             left = char_map[char] + 1
@@ -195,11 +404,12 @@ console.log("Result 2:", isValid("(]"));
         max_len = max(max_len, right - left + 1)
     return max_len
 
-print("Result:", lengthOfLongestSubstring("abcabcbb"))
+print("Result 1:", lengthOfLongestSubstring("abcabcbb"))
+print("Result 2:", lengthOfLongestSubstring("bbbbb"))
 `,
       javascript: `function lengthOfLongestSubstring(s) {
     const map = new Map();
-    let left = 0, maxLen = 0;
+    let maxLen = 0, left = 0;
     for (let right = 0; right < s.length; right++) {
         if (map.has(s[right]) && map.get(s[right]) >= left) {
             left = map.get(s[right]) + 1;
@@ -210,7 +420,116 @@ print("Result:", lengthOfLongestSubstring("abcabcbb"))
     return maxLen;
 }
 
-console.log("Result:", lengthOfLongestSubstring("abcabcbb"));
+console.log("Result 1:", lengthOfLongestSubstring("abcabcbb"));
+console.log("Result 2:", lengthOfLongestSubstring("bbbbb"));
+`,
+      typescript: `function lengthOfLongestSubstring(s: string): number {
+    const map = new Map<string, number>();
+    let maxLen = 0, left = 0;
+    for (let right = 0; right < s.length; right++) {
+        if (map.has(s[right]) && map.get(s[right])! >= left) {
+            left = map.get(s[right])! + 1;
+        }
+        map.set(s[right], right);
+        maxLen = Math.max(maxLen, right - left + 1);
+    }
+    return maxLen;
+}
+
+console.log("Result 1:", lengthOfLongestSubstring("abcabcbb"));
+console.log("Result 2:", lengthOfLongestSubstring("bbbbb"));
+`,
+      java: `import java.util.*;
+
+public class Solution {
+    public static int lengthOfLongestSubstring(String s) {
+        Map<Character, Integer> map = new HashMap<>();
+        int maxLen = 0, left = 0;
+        for (int right = 0; right < s.length(); right++) {
+            char c = s.charAt(right);
+            if (map.containsKey(c) && map.get(c) >= left) {
+                left = map.get(c) + 1;
+            }
+            map.put(c, right);
+            maxLen = Math.max(maxLen, right - left + 1);
+        }
+        return maxLen;
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Result 1: " + lengthOfLongestSubstring("abcabcbb"));
+        System.out.println("Result 2: " + lengthOfLongestSubstring("bbbbb"));
+    }
+}
+`,
+      cpp: `#include <iostream>
+#include <string>
+#include <unordered_map>
+#include <algorithm>
+
+int lengthOfLongestSubstring(const std::string& s) {
+    std::unordered_map<char, int> map;
+    int maxLen = 0, left = 0;
+    for (int right = 0; right < (int)s.size(); ++right) {
+        if (map.find(s[right]) != map.end() && map[s[right]] >= left) {
+            left = map[s[right]] + 1;
+        }
+        map[s[right]] = right;
+        maxLen = std::max(maxLen, right - left + 1);
+    }
+    return maxLen;
+}
+
+int main() {
+    std::cout << "Result 1: " << lengthOfLongestSubstring("abcabcbb") << "
+";
+    return 0;
+}
+`,
+      go: `package main
+
+import "fmt"
+
+func lengthOfLongestSubstring(s string) int {
+    charMap := make(map[rune]int)
+    maxLen, left := 0, 0
+    for right, ch := range s {
+        if idx, ok := charMap[ch]; ok && idx >= left {
+            left = idx + 1
+        }
+        charMap[ch] = right
+        if currLen := right - left + 1; currLen > maxLen {
+            maxLen = currLen
+        }
+    }
+    return maxLen
+}
+
+func main() {
+    fmt.Println("Result 1:", lengthOfLongestSubstring("abcabcbb"))
+}
+`,
+      rust: `use std::collections::HashMap;
+
+pub fn length_of_longest_substring(s: &str) -> usize {
+    let mut map = HashMap::new();
+    let mut max_len = 0;
+    let mut left = 0;
+    for (right, c) in s.chars().enumerate() {
+        if let Some(&idx) = map.get(&c) {
+            if idx >= left {
+                left = idx + 1;
+            }
+        }
+        map.insert(c, right);
+        max_len = max_len.max(right - left + 1);
+    }
+    max_len
+}
+
+fn main() {
+    println!("Result 1: {}", length_of_longest_substring("abcabcbb"));
+}
 `
     },
     testCases: [
@@ -255,7 +574,8 @@ You must write an algorithm with \`O(log n)\` runtime complexity.`,
             right = mid - 1
     return -1
 
-print("Result:", search([-1, 0, 3, 5, 9, 12], 9))
+print("Result 1:", search([-1, 0, 3, 5, 9, 12], 9))
+print("Result 2:", search([-1, 0, 3, 5, 9, 12], 2))
 `,
       javascript: `function search(nums, target) {
     let left = 0, right = nums.length - 1;
@@ -268,7 +588,103 @@ print("Result:", search([-1, 0, 3, 5, 9, 12], 9))
     return -1;
 }
 
-console.log("Result:", search([-1, 0, 3, 5, 9, 12], 9));
+console.log("Result 1:", search([-1, 0, 3, 5, 9, 12], 9));
+console.log("Result 2:", search([-1, 0, 3, 5, 9, 12], 2));
+`,
+      typescript: `function search(nums: number[], target: number): number {
+    let left = 0, right = nums.length - 1;
+    while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        if (nums[mid] === target) return mid;
+        if (nums[mid] < target) left = mid + 1;
+        else right = mid - 1;
+    }
+    return -1;
+}
+
+console.log("Result 1:", search([-1, 0, 3, 5, 9, 12], 9));
+console.log("Result 2:", search([-1, 0, 3, 5, 9, 12], 2));
+`,
+      java: `public class Solution {
+    public static int search(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] == target) return mid;
+            if (nums[mid] < target) left = mid + 1;
+            else right = mid - 1;
+        }
+        return -1;
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Result 1: " + search(new int[]{-1, 0, 3, 5, 9, 12}, 9));
+        System.out.println("Result 2: " + search(new int[]{-1, 0, 3, 5, 9, 12}, 2));
+    }
+}
+`,
+      cpp: `#include <iostream>
+#include <vector>
+
+int search(const std::vector<int>& nums, int target) {
+    int left = 0, right = (int)nums.size() - 1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (nums[mid] == target) return mid;
+        if (nums[mid] < target) left = mid + 1;
+        else right = mid - 1;
+    }
+    return -1;
+}
+
+int main() {
+    std::cout << "Result 1: " << search({-1, 0, 3, 5, 9, 12}, 9) << "
+";
+    return 0;
+}
+`,
+      go: `package main
+
+import "fmt"
+
+func search(nums []int, target int) int {
+    left, right := 0, len(nums)-1
+    for left <= right {
+        mid := left + (right-left)/2
+        if nums[mid] == target {
+            return mid
+        } else if nums[mid] < target {
+            left = mid + 1
+        } else {
+            right = mid - 1
+        }
+    }
+    return -1
+}
+
+func main() {
+    fmt.Println("Result 1:", search([]int{-1, 0, 3, 5, 9, 12}, 9))
+}
+`,
+      rust: `pub fn search(nums: &[i32], target: i32) -> i32 {
+    let mut left = 0usize;
+    let mut right = nums.len();
+    while left < right {
+        let mid = left + (right - left) / 2;
+        if nums[mid] == target {
+            return mid as i32;
+        } else if nums[mid] < target {
+            left = mid + 1;
+        } else {
+            right = mid;
+        }
+    }
+    -1
+}
+
+fn main() {
+    println!("Result 1: {}", search(&[-1, 0, 3, 5, 9, 12], 9));
+}
 `
     },
     testCases: [
@@ -553,33 +969,35 @@ export default function CodingPlayground() {
             {/* Editor Action Bar */}
             <div className="p-4 bg-slate-50/90 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
               
-              {/* Language Selector */}
-              <div className="flex items-center space-x-2">
+              {/* Language Selector (7 Supported Languages) */}
+              <div className="flex items-center space-x-2 flex-wrap">
                 <span className="text-xs font-mono font-bold text-slate-600 flex items-center gap-1">
                   <Code2 className="w-4 h-4 text-indigo-600" />
                   <span>Language:</span>
                 </span>
-                <div className="flex items-center p-0.5 rounded-xl bg-white border border-slate-200">
-                  <button
-                    onClick={() => handleSelectLanguage('python')}
-                    className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                      selectedLanguage === 'python'
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    Python 3
-                  </button>
-                  <button
-                    onClick={() => handleSelectLanguage('javascript')}
-                    className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                      selectedLanguage === 'javascript'
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    JavaScript (ES6)
-                  </button>
+                <div className="flex items-center p-1 rounded-xl bg-white border border-slate-200 overflow-x-auto gap-1">
+                  {[
+                    { id: 'python', label: 'Python 3' },
+                    { id: 'javascript', label: 'JavaScript' },
+                    { id: 'typescript', label: 'TypeScript' },
+                    { id: 'java', label: 'Java 21' },
+                    { id: 'cpp', label: 'C++ 20' },
+                    { id: 'go', label: 'Go' },
+                    { id: 'rust', label: 'Rust' },
+                  ].map((lang) => (
+                    <button
+                      key={lang.id}
+                      type="button"
+                      onClick={() => handleSelectLanguage(lang.id)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                        selectedLanguage === lang.id
+                          ? 'bg-indigo-600 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                      }`}
+                    >
+                      {lang.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 

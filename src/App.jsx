@@ -57,6 +57,7 @@ export default function App() {
     startSession,
     pauseSession,
     nextQuestion,
+    prevQuestion,
     endAndAnalyze
   } = useInterviewState();
 
@@ -115,9 +116,10 @@ export default function App() {
               onStart={startSession}
               onPause={pauseSession}
               onNext={nextQuestion}
+              onPrev={prevQuestion}
               onEndAndAnalyze={endAndAnalyze}
               onOpenTelemetryDrawer={() => setTelemetryDrawerOpen((v) => !v)}
-              onTranscriptUpdate={(newTxt) => setTranscript((prev) => prev ? `${prev} ${newTxt}` : newTxt)}
+              onTranscriptUpdate={(newTxt) => setTranscript(newTxt)}
               onAppendFollowUpQuestion={appendFollowUpQuestion}
             />
           )}
