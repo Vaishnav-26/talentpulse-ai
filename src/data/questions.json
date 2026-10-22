@@ -1,0 +1,1520 @@
+[
+  {
+    "id": 1,
+    "domain": "DSA & Algorithms",
+    "category": "Two Pointers & Arrays",
+    "role": "Full-Stack",
+    "difficulty": "Easy",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Two Sum & Two-Pointer Optimizations",
+    "prompt": "Explain the Two-Pointer technique versus Hash Map lookup for finding pairs that sum to a target. When is sorting first advantageous despite the O(N log N) overhead?",
+    "skillsAssessed": [
+      "Two Pointers",
+      "Hash Map",
+      "Time Complexity",
+      "Space vs Time Tradeoffs"
+    ],
+    "modelAnswerTip": "Explain O(N) time with O(N) space using Hash Map vs O(N log N) time with O(1) auxiliary space using Two Pointers on sorted arrays."
+  },
+  {
+    "id": 2,
+    "domain": "DSA & Algorithms",
+    "category": "Sliding Window",
+    "role": "Frontend",
+    "difficulty": "Medium",
+    "estimatedDuration": "2.5 mins",
+    "targetDurationSec": 150,
+    "title": "Dynamic Sliding Window for Substrings",
+    "prompt": "How do you apply a variable-size sliding window to find the Longest Substring Without Repeating Characters? Walk through how left and right pointers contract and expand.",
+    "skillsAssessed": [
+      "Sliding Window",
+      "Hash Set",
+      "Two Pointers",
+      "String Algorithms"
+    ],
+    "modelAnswerTip": "Detail maintaining a frequency hash map or last-seen index map, advancing the right pointer, and jumping the left pointer past duplicate occurrences."
+  },
+  {
+    "id": 3,
+    "domain": "DSA & Algorithms",
+    "category": "Binary Trees & BST",
+    "role": "Backend",
+    "difficulty": "Medium",
+    "estimatedDuration": "2.5 mins",
+    "targetDurationSec": 150,
+    "title": "Lowest Common Ancestor in Binary Trees",
+    "prompt": "How do you find the Lowest Common Ancestor (LCA) of two nodes in a standard Binary Tree versus a Binary Search Tree (BST)? What are the runtime complexities?",
+    "skillsAssessed": [
+      "Tree Traversal",
+      "DFS Recursion",
+      "BST Invariant",
+      "Big-O Analysis"
+    ],
+    "modelAnswerTip": "In BST, use key comparison to navigate left or right in O(H) time. In a general tree, use post-order DFS to propagate matching subtrees in O(N) time."
+  },
+  {
+    "id": 4,
+    "domain": "DSA & Algorithms",
+    "category": "Graph Algorithms",
+    "role": "Backend",
+    "difficulty": "Hard",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "Dijkstra vs A* Shortest Path Algorithms",
+    "prompt": "Compare Dijkstra's algorithm and A* search for finding shortest paths in weighted directed graphs. How does the admissible heuristic in A* guarantee optimality?",
+    "skillsAssessed": [
+      "Priority Queue",
+      "Heuristics",
+      "Graph Theory",
+      "Dijkstra",
+      "A* Search"
+    ],
+    "modelAnswerTip": "Explain min-heap priority queue tracking f(n) = g(n) + h(n), requiring h(n) <= true distance (admissible) to guarantee shortest path without overestimation."
+  },
+  {
+    "id": 5,
+    "domain": "DSA & Algorithms",
+    "category": "Dynamic Programming",
+    "role": "Full-Stack",
+    "difficulty": "Hard",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "0/1 Knapsack vs Unbounded Knapsack DP",
+    "prompt": "Explain the state transition equation for the 0/1 Knapsack problem versus Unbounded Knapsack. How can you optimize the 2D DP table into a 1D array?",
+    "skillsAssessed": [
+      "Dynamic Programming",
+      "Memoization",
+      "Space Optimization",
+      "State Transition"
+    ],
+    "modelAnswerTip": "Show dp[w] = max(dp[w], val[i] + dp[w - wt[i]]). For 0/1, iterate backwards to prevent reusing items; for unbounded, iterate forward."
+  },
+  {
+    "id": 6,
+    "domain": "DSA & Algorithms",
+    "category": "Heaps & Priority Queues",
+    "role": "Backend",
+    "difficulty": "Hard",
+    "estimatedDuration": "2.5 mins",
+    "targetDurationSec": 150,
+    "title": "Merge K Sorted Lists with Min-Heap",
+    "prompt": "Describe an optimal algorithm to merge K sorted linked lists of total length N. Compare the Min-Heap approach with divide-and-conquer merge sort.",
+    "skillsAssessed": [
+      "Min-Heap",
+      "Priority Queue",
+      "Divide & Conquer",
+      "Linked Lists"
+    ],
+    "modelAnswerTip": "Heap maintains K elements leading to O(N log K) time and O(K) space. Divide-and-conquer pairwise merges also yield O(N log K) with O(1) space."
+  },
+  {
+    "id": 7,
+    "domain": "DSA & Algorithms",
+    "category": "Trie & String Matching",
+    "role": "Frontend",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Autocomplete Search Engine using Prefix Trie",
+    "prompt": "How would you implement a high-throughput autocomplete system for search suggestions using a Trie data structure with top-K caching at each node?",
+    "skillsAssessed": [
+      "Trie Data Structure",
+      "Prefix Search",
+      "Top-K Caching",
+      "Frontend Performance"
+    ],
+    "modelAnswerTip": "Explain 26-ary tree or map-based child pointers, storing pre-computed top 5 suggestions at each prefix node for instant O(L) lookup where L is word length."
+  },
+  {
+    "id": 8,
+    "domain": "DSA & Algorithms",
+    "category": "Backtracking & Recursion",
+    "role": "Full-Stack",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "N-Queens & Constraint Satisfaction",
+    "prompt": "Explain how backtracking solves the N-Queens problem. How do you optimize column and diagonal collision checks from O(N) to O(1)?",
+    "skillsAssessed": [
+      "Backtracking",
+      "Bitmasking",
+      "Constraint Satisfaction",
+      "Recursion Tree"
+    ],
+    "modelAnswerTip": "Use boolean sets or bitmasks for columns, main diagonals (row - col), and anti-diagonals (row + col) to test valid placement in O(1)."
+  },
+  {
+    "id": 9,
+    "domain": "DSA & Algorithms",
+    "category": "Intervals & Sorting",
+    "role": "Full-Stack",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Merge Overlapping Intervals & Meeting Rooms",
+    "prompt": "Given a collection of meeting intervals, how do you find the minimum number of conference rooms required? Compare sorting by start/end times with a Min-Heap.",
+    "skillsAssessed": [
+      "Interval Scheduling",
+      "Min-Heap",
+      "Greedy Algorithms",
+      "Sorting"
+    ],
+    "modelAnswerTip": "Sort intervals by start time; push end times into a min-heap. If next start >= heap root, pop and reuse room. Max heap size is minimum rooms needed."
+  },
+  {
+    "id": 10,
+    "domain": "DSA & Algorithms",
+    "category": "Monotonic Stack",
+    "role": "Full-Stack",
+    "difficulty": "Hard",
+    "estimatedDuration": "2.5 mins",
+    "targetDurationSec": 150,
+    "title": "Largest Rectangle in Histogram & Monotonic Stack",
+    "prompt": "How does a Monotonic Stack solve the Largest Rectangle in Histogram problem in O(N) linear time? Explain the invariant maintained in the stack.",
+    "skillsAssessed": [
+      "Monotonic Stack",
+      "Linear Time Bounds",
+      "Coordinate Geometry",
+      "Array Scanning"
+    ],
+    "modelAnswerTip": "Maintain indices of increasing bar heights. When a shorter bar is encountered, pop heights and compute area using popped height * (current_index - new_top - 1)."
+  },
+  {
+    "id": 11,
+    "domain": "Database Systems & SQL",
+    "category": "Database Indexing",
+    "role": "Backend",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "B+ Tree Index Internals vs Hash Indexes",
+    "prompt": "Why do relational databases like PostgreSQL and MySQL use B+ Trees rather than Hash tables or Binary Search Trees for table indexing?",
+    "skillsAssessed": [
+      "B+ Trees",
+      "Range Queries",
+      "Disk I/O",
+      "Sequential Scanning",
+      "Database Indexing"
+    ],
+    "modelAnswerTip": "B+ Trees keep all data in leaf nodes linked sequentially for fast range scans and have high fanout (wide branching) reducing disk I/O seek operations."
+  },
+  {
+    "id": 12,
+    "domain": "Database Systems & SQL",
+    "category": "Transaction Isolation & ACID",
+    "role": "Backend",
+    "difficulty": "Hard",
+    "estimatedDuration": "2.5 mins",
+    "targetDurationSec": 150,
+    "title": "ACID Properties & Transaction Isolation Levels",
+    "prompt": "Explain the 4 standard SQL Transaction Isolation Levels. What are Dirty Reads, Non-Repeatable Reads, and Phantom Reads, and how does MVCC resolve them?",
+    "skillsAssessed": [
+      "ACID",
+      "MVCC",
+      "Dirty Reads",
+      "Phantom Reads",
+      "Serializable Isolation"
+    ],
+    "modelAnswerTip": "Cover Read Uncommitted, Read Committed, Repeatable Read, and Serializable. Explain Multi-Version Concurrency Control (MVCC) snapshots without read locks."
+  },
+  {
+    "id": 13,
+    "domain": "Database Systems & SQL",
+    "category": "SQL Query Optimization",
+    "role": "Full-Stack",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "EXPLAIN ANALYZE & Query Execution Plans",
+    "prompt": "How do you diagnose and fix a slow SQL query using EXPLAIN ANALYZE? When would you prefer a Composite Covering Index over individual single-column indexes?",
+    "skillsAssessed": [
+      "EXPLAIN ANALYZE",
+      "Seq Scan vs Index Scan",
+      "Covering Index",
+      "Query Optimization"
+    ],
+    "modelAnswerTip": "Look for Sequential Scans, high cost numbers, and nested loops. A Covering Index includes filtered and selected columns, avoiding heap table fetches."
+  },
+  {
+    "id": 14,
+    "domain": "Database Systems & SQL",
+    "category": "NoSQL vs Relational",
+    "role": "Backend",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "CAP Theorem & Relational vs Document Stores",
+    "prompt": "When architecting a high-throughput system, how do you decide between PostgreSQL and MongoDB or Cassandra in the context of the CAP theorem?",
+    "skillsAssessed": [
+      "CAP Theorem",
+      "PostgreSQL",
+      "MongoDB",
+      "Cassandra",
+      "Eventual Consistency"
+    ],
+    "modelAnswerTip": "Postgres provides strong CP consistency and ACID joins; Cassandra offers high-write AP availability and partition tolerance with tunable consistency."
+  },
+  {
+    "id": 15,
+    "domain": "Database Systems & SQL",
+    "category": "Database Sharding & Replication",
+    "role": "Backend",
+    "difficulty": "Hard",
+    "estimatedDuration": "2.5 mins",
+    "targetDurationSec": 150,
+    "title": "Database Sharding Strategies & Read Replicas",
+    "prompt": "Explain the difference between vertical partitioning, range-based sharding, and consistent hash sharding. How do you handle cross-shard transactions?",
+    "skillsAssessed": [
+      "Database Sharding",
+      "Consistent Hashing",
+      "2-Phase Commit",
+      "Read Replicas"
+    ],
+    "modelAnswerTip": "Consistent hashing avoids massive resharding on node changes. Cross-shard queries require two-phase commit (2PC) or Saga orchestrations with compensating transactions."
+  },
+  {
+    "id": 16,
+    "domain": "Database Systems & SQL",
+    "category": "SQL Joins & Algorithms",
+    "role": "Full-Stack",
+    "difficulty": "Easy",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Nested Loop Join vs Hash Join vs Merge Join",
+    "prompt": "How does the database query planner choose between Nested Loop Join, Hash Join, and Sort Merge Join? What are the prerequisite conditions for each?",
+    "skillsAssessed": [
+      "Hash Join",
+      "Merge Join",
+      "Nested Loops",
+      "Join Strategies"
+    ],
+    "modelAnswerTip": "Nested loop is optimal for small outer tables with indexed inner tables; Hash Join builds in-memory hash tables for equi-joins; Merge Join requires presorted inputs."
+  },
+  {
+    "id": 17,
+    "domain": "Database Systems & SQL",
+    "category": "Connection Pooling",
+    "role": "Backend",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Database Connection Pool Exhaustion & Sizing",
+    "prompt": "Why is giving a database 1,000 connections often slower than 50 connections? How does PgBouncer or HikariCP optimize connection pooling and memory overhead?",
+    "skillsAssessed": [
+      "Connection Pooling",
+      "HikariCP",
+      "PgBouncer",
+      "Context Switching",
+      "Throughput"
+    ],
+    "modelAnswerTip": "Too many connections cause CPU thrashing, memory paging, and lock contention. Optimal pool formula is roughly (core_count * 2) + effective_spindle_count."
+  },
+  {
+    "id": 18,
+    "domain": "Database Systems & SQL",
+    "category": "Data Modeling",
+    "role": "Full-Stack",
+    "difficulty": "Easy",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Database Normalization (1NF to 3NF) vs Denormalization",
+    "prompt": "Explain First, Second, and Third Normal Form (1NF, 2NF, 3NF). Under what scenarios is intentional denormalization appropriate in production systems?",
+    "skillsAssessed": [
+      "1NF 2NF 3NF",
+      "Transitive Dependency",
+      "Denormalization",
+      "Read Heavy Scaling"
+    ],
+    "modelAnswerTip": "1NF removes repeating groups, 2NF eliminates partial dependencies on composite keys, 3NF removes transitive dependencies. Denormalize for read-heavy dashboards."
+  },
+  {
+    "id": 19,
+    "domain": "Database Systems & SQL",
+    "category": "WAL & Durability",
+    "role": "Backend",
+    "difficulty": "Hard",
+    "estimatedDuration": "2.5 mins",
+    "targetDurationSec": 150,
+    "title": "Write-Ahead Logging (WAL) & Crash Recovery",
+    "prompt": "How does Write-Ahead Logging (WAL) ensure durability in relational databases without forcing immediate synchronous disk writes to table data pages on every commit?",
+    "skillsAssessed": [
+      "WAL",
+      "fsync",
+      "Durability",
+      "Checkpoints",
+      "Crash Recovery"
+    ],
+    "modelAnswerTip": "Sequential append-only WAL writes are fast; changes are buffered in memory and flushed periodically via Checkpointer processes. On crash, replay WAL."
+  },
+  {
+    "id": 20,
+    "domain": "Database Systems & SQL",
+    "category": "Distributed Caching",
+    "role": "Backend",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Cache Invalidation & Thundering Herd Prevention",
+    "prompt": "What are Cache-Aside, Write-Through, and Write-Back caching strategies? How do you prevent Cache Stampede (Thundering Herd) when high-traffic keys expire?",
+    "skillsAssessed": [
+      "Cache-Aside",
+      "Write-Through",
+      "Thundering Herd",
+      "Probabilistic Early Expiration"
+    ],
+    "modelAnswerTip": "Use mutex locks on cache miss, probabilistic early expiration (XFetch algorithm), or pre-warming caches with background worker cron jobs."
+  },
+  {
+    "id": 21,
+    "domain": "Backend & Core CS",
+    "category": "API Protocol Design",
+    "role": "Backend",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "REST vs GraphQL vs gRPC Architecture",
+    "prompt": "When designing microservices communication, compare REST (JSON over HTTP/1.1), GraphQL, and gRPC (Protobuf over HTTP/2). When should each be chosen?",
+    "skillsAssessed": [
+      "gRPC",
+      "Protobuf",
+      "HTTP/2 Multiplexing",
+      "GraphQL",
+      "REST APIs"
+    ],
+    "modelAnswerTip": "gRPC offers binary serialization and bidirectional streaming for internal microservices; GraphQL eliminates over/under-fetching for mobile; REST provides broad public compatibility."
+  },
+  {
+    "id": 22,
+    "domain": "Backend & Core CS",
+    "category": "Concurrency & Threading",
+    "role": "Backend",
+    "difficulty": "Hard",
+    "estimatedDuration": "2.5 mins",
+    "targetDurationSec": 150,
+    "title": "OS Deadlocks & Coffman Conditions",
+    "prompt": "What are the 4 Coffman conditions required for an Operating System deadlock to occur? How do you prevent and resolve deadlocks in multi-threaded code?",
+    "skillsAssessed": [
+      "Coffman Conditions",
+      "Deadlocks",
+      "Mutex Lock Ordering",
+      "Resource Allocation Graph"
+    ],
+    "modelAnswerTip": "1. Mutual exclusion, 2. Hold and wait, 3. No preemption, 4. Circular wait. Prevent deadlocks by enforcing strict global lock hierarchy ordering."
+  },
+  {
+    "id": 23,
+    "domain": "Backend & Core CS",
+    "category": "Event-Driven Architecture",
+    "role": "Backend",
+    "difficulty": "Hard",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "Kafka Partitioning, Consumer Groups & Offsets",
+    "prompt": "How does Apache Kafka achieve high write throughput and horizontal scaling using partitions and consumer groups? How do you guarantee exactly-once processing (EOS)?",
+    "skillsAssessed": [
+      "Kafka",
+      "Consumer Groups",
+      "Partition Keys",
+      "Idempotence",
+      "Exactly-Once Semantics"
+    ],
+    "modelAnswerTip": "Sequential append-only commit log, zero-copy OS sendfile, partition distribution across consumer groups, and transactional producers for EOS."
+  },
+  {
+    "id": 24,
+    "domain": "Backend & Core CS",
+    "category": "System Resiliency",
+    "role": "Backend",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Circuit Breaker Pattern & Cascading Failures",
+    "prompt": "How does the Circuit Breaker pattern (Closed, Open, Half-Open) protect distributed microservices from cascading failures when a downstream service degrades?",
+    "skillsAssessed": [
+      "Circuit Breaker",
+      "Resilience4j",
+      "Fallback Strategies",
+      "Exponential Backoff"
+    ],
+    "modelAnswerTip": "Track error rate; trip to Open on threshold to fail-fast without hitting doomed service; transition to Half-Open after timeout to test canary requests."
+  },
+  {
+    "id": 25,
+    "domain": "Backend & Core CS",
+    "category": "Distributed Systems",
+    "role": "Backend",
+    "difficulty": "Hard",
+    "estimatedDuration": "2.5 mins",
+    "targetDurationSec": 150,
+    "title": "Idempotency Keys & Distributed Payment Processing",
+    "prompt": "How do you architect an idempotent payment processing API endpoint to guarantee customers are never double-charged during network retries?",
+    "skillsAssessed": [
+      "Idempotency Keys",
+      "Distributed Locks",
+      "Payment APIs",
+      "Database Constraints"
+    ],
+    "modelAnswerTip": "Client passes unique Idempotency-Key. Server acquires Redis distributed lock, checks completed transaction table, executes charge, and stores atomic response."
+  },
+  {
+    "id": 26,
+    "domain": "Backend & Core CS",
+    "category": "Web Security & Auth",
+    "role": "Full-Stack",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "JWT vs Session Cookies & CSRF/XSS Mitigation",
+    "prompt": "Compare stateless JWT authentication with stateful session cookies stored in Redis. How do you protect authentication tokens against XSS and CSRF attacks?",
+    "skillsAssessed": [
+      "JWT",
+      "HttpOnly Cookies",
+      "CSRF Tokens",
+      "XSS Prevention",
+      "SameSite"
+    ],
+    "modelAnswerTip": "Store refresh tokens in HttpOnly SameSite=Strict cookies; keep short-lived access tokens in memory; validate CSRF anti-forgery headers on state mutations."
+  },
+  {
+    "id": 27,
+    "domain": "Backend & Core CS",
+    "category": "Linux & OS Internals",
+    "role": "Backend",
+    "difficulty": "Hard",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Process vs Thread Memory Layout & Context Switching",
+    "prompt": "Explain the virtual memory layout of a process (Code, Data, Heap, Stack). What happens during an OS CPU context switch between two processes vs two threads?",
+    "skillsAssessed": [
+      "Virtual Memory",
+      "Page Tables",
+      "TLB Flush",
+      "Context Switching",
+      "Stack vs Heap"
+    ],
+    "modelAnswerTip": "Processes have distinct virtual address spaces requiring TLB cache flushes during context switches; threads share address space, swapping only register state and stack pointers."
+  },
+  {
+    "id": 28,
+    "domain": "Backend & Core CS",
+    "category": "Distributed Tracing & Telemetry",
+    "role": "DevOps",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Distributed Tracing with OpenTelemetry & Jaeger",
+    "prompt": "How does distributed tracing propagate Trace IDs and Span IDs across asynchronous microservices via HTTP headers and message broker metadata?",
+    "skillsAssessed": [
+      "OpenTelemetry",
+      "Trace Context Propagation",
+      "Baggage",
+      "Jaeger",
+      "Latency Analysis"
+    ],
+    "modelAnswerTip": "Inject W3C traceparent headers (version-trace_id-parent_id-flags) at client calls; extract headers in downstream middleware to link trace spans into DAG trees."
+  },
+  {
+    "id": 29,
+    "domain": "Backend & Core CS",
+    "category": "Load Balancing",
+    "role": "Backend",
+    "difficulty": "Easy",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Layer 4 vs Layer 7 Load Balancing Algorithms",
+    "prompt": "What is the difference between Layer 4 (Transport TCP/UDP) and Layer 7 (Application HTTP) load balancing? Compare Round Robin, Least Connections, and IP Hash.",
+    "skillsAssessed": [
+      "Load Balancing",
+      "L4 vs L7",
+      "HAProxy",
+      "Nginx",
+      "Reverse Proxy"
+    ],
+    "modelAnswerTip": "L4 routes packets without inspecting HTTP headers/cookies; L7 terminates SSL, inspects paths, headers, and cookies to enable intelligent content-based routing."
+  },
+  {
+    "id": 30,
+    "domain": "Backend & Core CS",
+    "category": "Real-Time Communications",
+    "role": "Full-Stack",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "WebSockets vs Server-Sent Events (SSE) vs Polling",
+    "prompt": "When should you choose WebSockets over Server-Sent Events (SSE) or Long Polling? How do you scale WebSocket connections across a horizontal cluster?",
+    "skillsAssessed": [
+      "WebSockets",
+      "SSE",
+      "Pub/Sub Redis Adapter",
+      "Socket.io",
+      "Horizontal Scaling"
+    ],
+    "modelAnswerTip": "SSE is lightweight unidirectional HTTP streaming for notifications; WebSockets provide full-duplex framing. Scale with Redis Pub/Sub backplane."
+  },
+  {
+    "id": 31,
+    "domain": "Web & Frontend",
+    "category": "JavaScript Engine & Event Loop",
+    "role": "Frontend",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "JavaScript Event Loop, Microtasks & Macrotasks",
+    "prompt": "Explain the execution order of synchronous JavaScript code, Microtasks (Promise.then, queueMicrotask), and Macrotasks (setTimeout, requestAnimationFrame, I/O).",
+    "skillsAssessed": [
+      "Event Loop",
+      "Microtasks",
+      "Macrotasks",
+      "V8 Engine",
+      "Call Stack"
+    ],
+    "modelAnswerTip": "Call stack empties -> all pending microtasks drain completely -> requestAnimationFrame runs before layout/paint -> one macrotask executes -> repeat."
+  },
+  {
+    "id": 32,
+    "domain": "Web & Frontend",
+    "category": "React 19 & Fiber Internals",
+    "role": "Frontend",
+    "difficulty": "Hard",
+    "estimatedDuration": "2.5 mins",
+    "targetDurationSec": 150,
+    "title": "React Fiber Architecture & Concurrent Mode",
+    "prompt": "How did React Fiber replace the legacy stack reconciler? How does time-slicing (Concurrent Rendering) allow high-priority user interactions to interrupt background work?",
+    "skillsAssessed": [
+      "React Fiber",
+      "Concurrent Mode",
+      "useTransition",
+      "Virtual DOM Diffing",
+      "Time Slicing"
+    ],
+    "modelAnswerTip": "Fiber is a doubly-linked tree data structure representing units of work. Concurrent mode yields control back to browser main thread using MessageChannel/Scheduler."
+  },
+  {
+    "id": 33,
+    "domain": "Web & Frontend",
+    "category": "Web Performance & Core Web Vitals",
+    "role": "Frontend",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Optimizing Core Web Vitals (LCP, INP, CLS)",
+    "prompt": "How do you measure and optimize Largest Contentful Paint (LCP), Interaction to Next Paint (INP), and Cumulative Layout Shift (CLS) on modern web applications?",
+    "skillsAssessed": [
+      "Core Web Vitals",
+      "LCP",
+      "INP",
+      "CLS",
+      "Image Optimization",
+      "Code Splitting"
+    ],
+    "modelAnswerTip": "LCP: Preload hero images, SSR/edge CDN; INP: Break long tasks (<50ms) using scheduler.yield(); CLS: Set explicit width/height dimensions on media."
+  },
+  {
+    "id": 34,
+    "domain": "Web & Frontend",
+    "category": "Browser Rendering Pipeline",
+    "role": "Frontend",
+    "difficulty": "Hard",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Browser Critical Rendering Path & Compositing",
+    "prompt": "Trace the step-by-step browser rendering pipeline from HTML parsing to Pixels on screen (DOM, CSSOM, Render Tree, Layout, Paint, Composite). Why are transform/opacity animations GPU-accelerated?",
+    "skillsAssessed": [
+      "DOM CSSOM",
+      "Layout vs Paint",
+      "Compositing Layers",
+      "GPU Acceleration"
+    ],
+    "modelAnswerTip": "Transform and opacity bypass Layout and Paint phases entirely, updating only Compositing layers directly on GPU threads without triggering reflows."
+  },
+  {
+    "id": 35,
+    "domain": "Web & Frontend",
+    "category": "State Management Architecture",
+    "role": "Frontend",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Server State (React Query) vs Client State (Zustand/Redux)",
+    "prompt": "Why has the modern frontend ecosystem shifted away from storing server API responses in Redux stores toward dedicated server state libraries like TanStack Query?",
+    "skillsAssessed": [
+      "TanStack Query",
+      "Zustand",
+      "Redux Toolkit",
+      "Caching & Stale-While-Revalidate"
+    ],
+    "modelAnswerTip": "Server state involves caching, deduplication, polling, background revalidation, and optimistic updates; client state only tracks transient UI state like modals."
+  },
+  {
+    "id": 36,
+    "domain": "Web & Frontend",
+    "category": "Micro-Frontends & Module Federation",
+    "role": "Frontend",
+    "difficulty": "Hard",
+    "estimatedDuration": "2.5 mins",
+    "targetDurationSec": 150,
+    "title": "Micro-Frontends with Webpack Module Federation",
+    "prompt": "How does Webpack 5 Module Federation enable independent teams to deploy micro-frontends without iframe isolation or duplicate shared vendor bundles?",
+    "skillsAssessed": [
+      "Micro-Frontends",
+      "Module Federation",
+      "Shared Dependencies",
+      "Dynamic Remotes"
+    ],
+    "modelAnswerTip": "Host application dynamically loads remoteEntry.js at runtime, sharing single instances of React/React-DOM via shared dependency scope."
+  },
+  {
+    "id": 37,
+    "domain": "Web & Frontend",
+    "category": "Security & CORS",
+    "role": "Full-Stack",
+    "difficulty": "Easy",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Cross-Origin Resource Sharing (CORS) & Preflight OPTIONS",
+    "prompt": "What triggers a CORS preflight OPTIONS request in the browser? How do you configure Access-Control-Allow-Origin, Headers, and Credentials correctly?",
+    "skillsAssessed": [
+      "CORS",
+      "Preflight OPTIONS",
+      "Access-Control-Allow-Origin",
+      "Browser Security"
+    ],
+    "modelAnswerTip": "Non-simple requests (methods other than GET/POST/HEAD or custom headers like Authorization/Content-Type application/json) trigger preflight OPTIONS."
+  },
+  {
+    "id": 38,
+    "domain": "Web & Frontend",
+    "category": "Service Workers & PWA",
+    "role": "Frontend",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Service Worker Lifecycle & Offline Caching Strategies",
+    "prompt": "Explain the Service Worker lifecycle (Register, Install, Activate, Fetch). Compare Cache-First, Network-First, and Stale-While-Revalidate caching strategies.",
+    "skillsAssessed": [
+      "Service Workers",
+      "PWA",
+      "Cache API",
+      "Stale While Revalidate",
+      "Offline First"
+    ],
+    "modelAnswerTip": "Service worker acts as a client-side programmable network proxy. Stale-While-Revalidate immediately serves cached data while asynchronously updating cache from network."
+  },
+  {
+    "id": 39,
+    "domain": "Web & Frontend",
+    "category": "CSS Architecture & Glassmorphism",
+    "role": "Frontend",
+    "difficulty": "Easy",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Light Glassmorphism CSS Tokens & Backdrop Blur Performance",
+    "prompt": "How do you implement modern Light Glassmorphism UI tokens using CSS backdrop-filter, rgba alpha transparency, and subtle border highlights without causing GPU paint lag?",
+    "skillsAssessed": [
+      "CSS Backdrop Filter",
+      "Glassmorphism",
+      "GPU Layers",
+      "will-change",
+      "Design Tokens"
+    ],
+    "modelAnswerTip": "Use background rgba(255,255,255,0.75), backdrop-filter: blur(16px), 1px solid rgba(255,255,255,0.8), and isolate blur containers to prevent global repaint cascades."
+  },
+  {
+    "id": 40,
+    "domain": "Web & Frontend",
+    "category": "Web Workers & Multithreading",
+    "role": "Frontend",
+    "difficulty": "Hard",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Offloading Heavy Computations to Web Workers & Comlink",
+    "prompt": "How do you transfer large image buffers or complex telemetry calculation pipelines off the main UI thread using Web Workers and transferable ArrayBuffers?",
+    "skillsAssessed": [
+      "Web Workers",
+      "Transferable Objects",
+      "Zero-Copy Buffers",
+      "OffscreenCanvas"
+    ],
+    "modelAnswerTip": "postMessage(data, [data.buffer]) transfers ownership of the underlying memory buffer with zero serialization copy overhead, keeping UI running at 60 FPS."
+  },
+  {
+    "id": 41,
+    "domain": "Quantitative & Logical Aptitude",
+    "category": "Speed, Time & Distance",
+    "role": "General",
+    "difficulty": "Easy",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Relative Speed & Train Crossing Calculations",
+    "prompt": "A 240m long train running at 72 km/h crosses another train of length 160m running in the opposite direction at 54 km/h. How many seconds will it take to cross completely?",
+    "skillsAssessed": [
+      "Relative Speed",
+      "Unit Conversion",
+      "Time & Distance",
+      "Mental Arithmetic"
+    ],
+    "modelAnswerTip": "Total distance = 240 + 160 = 400m. Relative speed = 72 + 54 = 126 km/h = 126 * (5/18) = 35 m/s. Time = 400 / 35 = 11.43 seconds."
+  },
+  {
+    "id": 42,
+    "domain": "Quantitative & Logical Aptitude",
+    "category": "Probability & Combinatorics",
+    "role": "General",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Conditional Probability & Bayes Theorem",
+    "prompt": "A medical test is 99% accurate for positive cases and 99% accurate for negative cases. If 0.1% of the population has the disease, what is the probability a person testing positive actually has it?",
+    "skillsAssessed": [
+      "Bayes Theorem",
+      "Conditional Probability",
+      "False Positives",
+      "Statistical Reasoning"
+    ],
+    "modelAnswerTip": "P(D|+) = (0.99 * 0.001) / [(0.99 * 0.001) + (0.01 * 0.999)] = 0.00099 / (0.00099 + 0.00999) = ~9.01%. Highlighting the base rate fallacy."
+  },
+  {
+    "id": 43,
+    "domain": "Quantitative & Logical Aptitude",
+    "category": "Permutations & Combinations",
+    "role": "General",
+    "difficulty": "Easy",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Circular Arrangements & Seating Combinations",
+    "prompt": "In how many ways can 6 software engineers sit around a circular table if 2 specific senior leads must always sit together?",
+    "skillsAssessed": [
+      "Circular Permutations",
+      "Grouping Method",
+      "Combinatorics"
+    ],
+    "modelAnswerTip": "Treat the 2 leads as 1 unit -> 5 entities in a circle arrange in (5-1)! = 4! = 24 ways. The 2 leads can swap seats in 2! = 2 ways. Total = 24 * 2 = 48 ways."
+  },
+  {
+    "id": 44,
+    "domain": "Quantitative & Logical Aptitude",
+    "category": "Work & Time Efficiency",
+    "role": "General",
+    "difficulty": "Easy",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Pipes & Cisterns Inflow/Outflow Problem",
+    "prompt": "Pipe A fills a storage tank in 12 hours, Pipe B fills it in 15 hours, and Pipe C empties it in 20 hours. If all three are opened simultaneously, how long will it take to fill the tank?",
+    "skillsAssessed": [
+      "Work & Time",
+      "Rate of Flow",
+      "LCM Method"
+    ],
+    "modelAnswerTip": "LCM of 12, 15, 20 = 60 units. Rate A = +5, Rate B = +4, Rate C = -3. Net rate = 5 + 4 - 3 = 6 units/hour. Time = 60 / 6 = 10 hours."
+  },
+  {
+    "id": 45,
+    "domain": "Quantitative & Logical Aptitude",
+    "category": "Critical Reasoning & Logic",
+    "role": "General",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Knight & Knave Island Truth Riddle",
+    "prompt": "On an island where Knights always tell the truth and Knaves always lie, you meet two inhabitants A and B. A says: 'At least one of us is a Knave.' What are A and B?",
+    "skillsAssessed": [
+      "Deductive Logic",
+      "Truth Tables",
+      "Proof by Contradiction"
+    ],
+    "modelAnswerTip": "If A were a Knave, his statement would be false (implying neither is a Knave, meaning both are Knights, a contradiction). Thus A is a Knight, making his statement true, so B is a Knave."
+  },
+  {
+    "id": 46,
+    "domain": "Quantitative & Logical Aptitude",
+    "category": "Puzzles & Binary Logic",
+    "role": "General",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "1000 Wine Bottles & 10 Poison Test Strips",
+    "prompt": "You have 1000 bottles of wine and exactly one is poisoned. You have 10 test strips that turn red after 24 hours if exposed to poison. How do you identify the poisoned bottle in a single 24-hour round?",
+    "skillsAssessed": [
+      "Binary Representation",
+      "Information Theory",
+      "Bitwise Encoding"
+    ],
+    "modelAnswerTip": "Number bottles 1 to 1000 in binary (10 bits, 2^10 = 1024). Apply a drop from bottle X to strip i if the i-th bit of X is 1. After 24 hours, the active strips directly spell the binary index."
+  },
+  {
+    "id": 47,
+    "domain": "Quantitative & Logical Aptitude",
+    "category": "Data Interpretation & Ratios",
+    "role": "General",
+    "difficulty": "Easy",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Mixtures & Alligation Percentage Shift",
+    "prompt": "A 50-liter container contains milk and water in a 4:1 ratio. How many liters of water must be added to make the ratio of milk to water 2:1?",
+    "skillsAssessed": [
+      "Alligations & Mixtures",
+      "Ratios",
+      "Proportions"
+    ],
+    "modelAnswerTip": "Initial: Milk = 40L, Water = 10L. For 2:1 ratio with 40L milk, required water is 40 / 2 = 20L. Water to add = 20 - 10 = 10 liters."
+  },
+  {
+    "id": 48,
+    "domain": "Quantitative & Logical Aptitude",
+    "category": "Financial Mathematics",
+    "role": "General",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Compound Interest vs Simple Interest Spread",
+    "prompt": "The difference between Compound Interest (compounded annually) and Simple Interest on a principal sum at 10% per annum for 2 years is $150. Find the principal sum.",
+    "skillsAssessed": [
+      "Compound Interest",
+      "Simple Interest",
+      "Algebraic Formulas"
+    ],
+    "modelAnswerTip": "Difference for 2 years = P * (R / 100)^2. Here 150 = P * (10 / 100)^2 = P * (1/100). Therefore Principal P = 150 * 100 = $15,000."
+  },
+  {
+    "id": 49,
+    "domain": "Quantitative & Logical Aptitude",
+    "category": "Clock & Angles",
+    "role": "General",
+    "difficulty": "Easy",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Angle Between Clock Hands at 3:30",
+    "prompt": "What is the exact angle between the hour hand and the minute hand of an analog clock at 3:30?",
+    "skillsAssessed": [
+      "Clock Geometry",
+      "Angular Speed",
+      "Mental Calculation"
+    ],
+    "modelAnswerTip": "Minute hand at 30 min = 180 degrees. Hour hand at 3:30 = 3 * 30 + 30 * 0.5 = 105 degrees. Angle = 180 - 105 = 75 degrees."
+  },
+  {
+    "id": 50,
+    "domain": "Quantitative & Logical Aptitude",
+    "category": "Set Theory & Syllogisms",
+    "role": "General",
+    "difficulty": "Easy",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Venn Diagram & Overlapping Survey Problem",
+    "prompt": "In an engineering department of 100 engineers, 70 know Python, 60 know JavaScript, and 10 know neither. How many engineers know both Python and JavaScript?",
+    "skillsAssessed": [
+      "Set Theory",
+      "Venn Diagrams",
+      "Inclusion-Exclusion Principle"
+    ],
+    "modelAnswerTip": "Total knowing at least one = 100 - 10 = 90. By Inclusion-Exclusion: n(P \u222a J) = n(P) + n(J) - n(P \u2229 J) => 90 = 70 + 60 - n(both). Therefore n(both) = 130 - 90 = 40 engineers."
+  },
+  {
+    "domain": "DSA & Algorithms",
+    "category": "Design & Data Structures",
+    "role": "Full-Stack & Backend",
+    "difficulty": "Medium",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "Design an LRU Cache with O(1) Get and Put",
+    "prompt": "Explain how you would design a Least Recently Used (LRU) cache supporting get(key) and put(key, value) in strictly O(1) average time complexity. Which data structures do you combine and why?",
+    "skillsAssessed": [
+      "Hash Map",
+      "Doubly Linked List",
+      "O(1) Time Bounds",
+      "Cache Eviction"
+    ],
+    "modelAnswerTip": "Pair a Hash Map (for O(1) key lookups) with a Doubly Linked List (for O(1) node relocation and eviction from the tail). Address sentinel head and tail dummy nodes to avoid null checks.",
+    "optimalTime": "O(1)",
+    "auxiliarySpace": "O(Capacity)",
+    "id": 51
+  },
+  {
+    "domain": "DSA & Algorithms",
+    "category": "Graphs & Topological Sort",
+    "role": "Senior Software Engineer",
+    "difficulty": "Hard",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "Course Schedule & Cycle Detection in Directed Graphs",
+    "prompt": "How do you determine if a set of prerequisite course dependencies can be completed? Explain cycle detection in directed graphs using both Kahn's algorithm (BFS) and DFS with 3-color marking.",
+    "skillsAssessed": [
+      "Graph Theory",
+      "Topological Sort",
+      "Kahn's Algorithm",
+      "Cycle Detection"
+    ],
+    "modelAnswerTip": "Kahn's algorithm tracks in-degrees of nodes in a queue; if processed nodes < total courses, a directed cycle exists. In DFS, track node states (Unvisited, Visiting/In-Stack, Visited) to spot back-edges.",
+    "optimalTime": "O(V + E)",
+    "auxiliarySpace": "O(V + E)",
+    "id": 52
+  },
+  {
+    "domain": "DSA & Algorithms",
+    "category": "Dynamic Programming",
+    "role": "Full-Stack & Backend",
+    "difficulty": "Medium",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "Longest Palindromic Substring via Dynamic Programming vs Expand Around Center",
+    "prompt": "Compare the 2D Dynamic Programming table approach vs the Expand Around Center technique for finding the Longest Palindromic Substring in a string of length N.",
+    "skillsAssessed": [
+      "Dynamic Programming",
+      "Two Pointers",
+      "Palindrome Verification",
+      "Space Tradeoffs"
+    ],
+    "modelAnswerTip": "DP table requires O(N^2) time and O(N^2) space: dp[i][j] = (s[i] == s[j]) && dp[i+1][j-1]. Expand Around Center achieves identical O(N^2) time but requires strictly O(1) auxiliary space across 2N-1 centers.",
+    "optimalTime": "O(N^2)",
+    "auxiliarySpace": "O(1) Expand vs O(N^2) DP",
+    "id": 53
+  },
+  {
+    "domain": "DSA & Algorithms",
+    "category": "Heaps & Priority Queues",
+    "role": "Senior Backend",
+    "difficulty": "Hard",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "Merge K Sorted Linked Lists",
+    "prompt": "Given K sorted linked lists with N total nodes, how do you merge them into a single sorted list efficiently? Compare the Min-Heap approach with Divide and Conquer.",
+    "skillsAssessed": [
+      "Min-Heap",
+      "Divide and Conquer",
+      "Priority Queue",
+      "Merge Sort"
+    ],
+    "modelAnswerTip": "A Min-Heap of size K yields O(N log K) time and O(K) space. Divide and Conquer iteratively merges list pairs like merge sort, achieving O(N log K) time with O(1) auxiliary space if done iteratively.",
+    "optimalTime": "O(N log K)",
+    "auxiliarySpace": "O(K) or O(1)",
+    "id": 54
+  },
+  {
+    "domain": "DSA & Algorithms",
+    "category": "Trie & String Search",
+    "role": "Full-Stack",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Prefix Tree (Trie) Search and Auto-Complete",
+    "prompt": "Why is a Trie preferred over a Hash Table for auto-complete prefix search? What are the time and memory implications of storing 1,000,000 dictionary words in a Trie?",
+    "skillsAssessed": [
+      "Trie Data Structure",
+      "Prefix Matching",
+      "Memory Tradeoffs",
+      "Auto-Complete"
+    ],
+    "modelAnswerTip": "A Trie checks prefix existence in O(L) time where L is prefix length, independent of dictionary size N. A Hash Table would require O(N) or pre-generating all prefixes which explodes memory O(N * L^2).",
+    "optimalTime": "O(L)",
+    "auxiliarySpace": "O(Alphabet_Size * L * N)",
+    "id": 55
+  },
+  {
+    "domain": "Backend & Core CS",
+    "category": "Distributed Systems",
+    "role": "Senior Backend",
+    "difficulty": "Hard",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "Distributed Locks: Redis Redlock vs ZooKeeper/etcd",
+    "prompt": "How does distributed mutual exclusion work? Contrast single-instance Redis SET NX PX with Martin Kleppmann's critique of the Redlock algorithm, and when you should use etcd/ZooKeeper instead.",
+    "skillsAssessed": [
+      "Distributed Locks",
+      "Redlock",
+      "Clock Drift",
+      "Consensus",
+      "etcd"
+    ],
+    "modelAnswerTip": "Redis SET NX with random tokens and Lua unlock scripts is fast but susceptible to master-replica failover race conditions. Redlock relies on time bounds across independent nodes, vulnerable to pause/clock drift. For strict linearizability, use Raft/Paxos-backed etcd with fencing tokens.",
+    "optimalTime": "O(1) network hops",
+    "auxiliarySpace": "O(1)",
+    "id": 56
+  },
+  {
+    "domain": "Backend & Core CS",
+    "category": "Message Streaming",
+    "role": "Staff Engineer",
+    "difficulty": "Hard",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "Apache Kafka Partitioning, Consumer Groups & Exactly-Once Semantics",
+    "prompt": "Explain how Kafka ensures ordered message processing within partitions, how rebalancing works in consumer groups, and how Kafka achieves Exactly-Once Processing (EOS).",
+    "skillsAssessed": [
+      "Kafka",
+      "Consumer Rebalancing",
+      "Idempotence",
+      "Two-Phase Commit"
+    ],
+    "modelAnswerTip": "Ordering is strictly guaranteed within a single partition via immutable sequential log offsets. EOS requires idempotent producers (PID + sequence numbers) paired with Kafka's two-phase transaction coordinator across input offsets and output topics.",
+    "optimalTime": "O(1) sequential write",
+    "auxiliarySpace": "O(1) memory buffer",
+    "id": 57
+  },
+  {
+    "domain": "Backend & Core CS",
+    "category": "Concurrency & OS",
+    "role": "Backend Engineer",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Operating System Threads vs Virtual Threads / Goroutines",
+    "prompt": "Explain the architectural differences between OS kernel threads (1:1) and user-space green threads / goroutines (M:N). Why can Go or Java 21 handle 1,000,000 concurrent threads while OS threads crash?",
+    "skillsAssessed": [
+      "Concurrency",
+      "Virtual Threads",
+      "Context Switching",
+      "Stack Memory"
+    ],
+    "modelAnswerTip": "OS kernel threads allocate 1\u20132MB fixed call stacks and require ring 0 kernel context switching. Goroutines and Virtual Threads allocate 2\u20134KB expandable stacks on the heap and switch in user-space via cooperative/work-stealing schedulers without kernel mode transitions.",
+    "optimalTime": "Sub-microsecond switch",
+    "auxiliarySpace": "2KB vs 1MB per thread",
+    "id": 58
+  },
+  {
+    "domain": "Backend & Core CS",
+    "category": "API Protocols",
+    "role": "Full-Stack",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "gRPC / Protobuf vs REST / JSON: Architectural Tradeoffs",
+    "prompt": "When would you adopt gRPC over REST in an enterprise microservice architecture? What makes HTTP/2 binary framing and Protocol Buffers more performant than JSON over HTTP/1.1?",
+    "skillsAssessed": [
+      "gRPC",
+      "Protobuf",
+      "HTTP/2 Multiplexing",
+      "Microservices"
+    ],
+    "modelAnswerTip": "Protobuf uses binary serialization with field tags and varints, drastically smaller and faster to serialize than JSON string parsing. HTTP/2 brings single-connection multiplexing, header compression (HPACK), and bi-directional streaming. REST remains superior for public API developer ergonomics.",
+    "optimalTime": "Sub-millisecond parse",
+    "auxiliarySpace": "Compact binary payload",
+    "id": 59
+  },
+  {
+    "domain": "Database Systems & SQL",
+    "category": "Transaction Isolation",
+    "role": "Database Architect",
+    "difficulty": "Hard",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "ACID Isolation Levels & Concurrency Anomalies",
+    "prompt": "Define the four ANSI SQL transaction isolation levels (Read Uncommitted, Read Committed, Repeatable Read, Serializable). Explain Dirty Reads, Non-Repeatable Reads, and Phantom Reads.",
+    "skillsAssessed": [
+      "ACID Isolation",
+      "Phantom Reads",
+      "MVCC",
+      "Snapshot Isolation"
+    ],
+    "modelAnswerTip": "Read Committed prevents Dirty Reads via read locks/snapshots. Repeatable Read prevents Non-Repeatable Reads using consistent snapshots or shared locks until commit. Serializable prevents Phantom Reads via predicate/range locks or SSI (Serializable Snapshot Isolation).",
+    "optimalTime": "O(1) Snapshot lookup",
+    "auxiliarySpace": "Undo log / MVCC row versions",
+    "id": 60
+  },
+  {
+    "domain": "Database Systems & SQL",
+    "category": "Database Internals",
+    "role": "Backend Engineer",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "B-Tree vs LSM-Tree (Log-Structured Merge-Tree) Storage Engines",
+    "prompt": "Why do relational databases like PostgreSQL use B-Trees while NoSQL databases like Cassandra and RocksDB use LSM-Trees? Explain write amplification vs read amplification.",
+    "skillsAssessed": [
+      "B-Trees",
+      "LSM-Trees",
+      "Write Amplification",
+      "SSTables",
+      "Bloom Filters"
+    ],
+    "modelAnswerTip": "B-Trees perform in-place random writes to disk pages, giving predictable O(log N) reads but higher write amplification. LSM-Trees append writes sequentially to a MemTable and WAL, then flush to immutable SSTables, yielding superior write throughput at the cost of background compaction and Bloom filters for reads.",
+    "optimalTime": "O(log N) vs O(1) append",
+    "auxiliarySpace": "MemTable buffer + Bloom Filters",
+    "id": 61
+  },
+  {
+    "domain": "Database Systems & SQL",
+    "category": "Distributed Sharding",
+    "role": "Staff Engineer",
+    "difficulty": "Hard",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "Database Sharding: Range-Based vs Hash-Based with Consistent Hashing",
+    "prompt": "How do you horizontally partition a database that has grown past 50TB? Compare Range Sharding vs Hash Sharding, and explain how Consistent Hashing with virtual nodes avoids massive re-indexing on cluster expansion.",
+    "skillsAssessed": [
+      "Horizontal Sharding",
+      "Consistent Hashing",
+      "Virtual Nodes",
+      "Hotspots"
+    ],
+    "modelAnswerTip": "Range sharding groups keys sequentially (easy range scans, but hot-spot prone on sequential timestamps). Hash sharding distributes evenly. Consistent Hashing places nodes on a ring (0 to 2^32-1); adding a node only migrates K/N keys rather than all keys. Virtual nodes ensure uniform load distribution.",
+    "optimalTime": "O(log N) ring search",
+    "auxiliarySpace": "Hash ring topology table",
+    "id": 62
+  },
+  {
+    "domain": "Web & Frontend",
+    "category": "React 19 & Next.js",
+    "role": "Frontend Architect",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "React Server Components (RSC) vs Client Components",
+    "prompt": "Explain the boundary between React Server Components and Client Components in React 19. How do RSCs eliminate client JavaScript bundle size and stream HTML via Suspense?",
+    "skillsAssessed": [
+      "React 19",
+      "RSC",
+      "Zero-Bundle Components",
+      "Streaming HTML",
+      "Hydration"
+    ],
+    "modelAnswerTip": "RSC execute strictly on the server during the build or request, outputting a serialized JSON tree format without shipping their component code or dependencies (like moment or markdown parsers) to the client. Client components ('use client') handle interactivity and hooks.",
+    "optimalTime": "Zero-client JS overhead",
+    "auxiliarySpace": "Server stream pipeline",
+    "id": 63
+  },
+  {
+    "domain": "Web & Frontend",
+    "category": "Browser Performance",
+    "role": "Senior Frontend",
+    "difficulty": "Medium",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "Optimizing Critical Rendering Path & Core Web Vitals (LCP, INP, CLS)",
+    "prompt": "How do browsers construct the DOM and CSSOM, and execute the layout/paint render tree? What specific architectural techniques optimize LCP (Largest Contentful Paint) and INP (Interaction to Next Paint)?",
+    "skillsAssessed": [
+      "DOM/CSSOM",
+      "Layout Thrashing",
+      "Core Web Vitals",
+      "LCP",
+      "INP"
+    ],
+    "modelAnswerTip": "LCP is optimized by preloading hero assets, priority hints (fetchpriority='high'), and server-side rendering without render-blocking CSS/JS. INP is optimized by yielding long tasks to the main thread via scheduler.yield() or requestIdleCallback, avoiding layout thrashing, and keeping event handlers under 50ms.",
+    "optimalTime": "Sub-50ms main thread tasks",
+    "auxiliarySpace": "Offscreen render buffers",
+    "id": 64
+  },
+  {
+    "domain": "Web & Frontend",
+    "category": "Real-Time Media",
+    "role": "Full-Stack Engineer",
+    "difficulty": "Hard",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "WebRTC vs WebSocket: Real-Time Audio/Video Telemetry Architecture",
+    "prompt": "When should an interactive AI interview platform stream video over WebRTC instead of WebSockets? Explain the role of SDP negotiation, STUN/TURN traversal, and UDP packet loss tolerance.",
+    "skillsAssessed": [
+      "WebRTC",
+      "WebSockets",
+      "SDP Offer/Answer",
+      "STUN/TURN",
+      "UDP Latency"
+    ],
+    "modelAnswerTip": "WebSockets run over TCP: dropped packets force retransmissions (head-of-line blocking), causing latency spikes unsuited for live bidirectional audio/video. WebRTC runs over UDP with SRTP, trading minor packet loss for sub-200ms latency. STUN discovers public IP/port; TURN relays traffic when symmetric NAT blocks peer-to-peer.",
+    "optimalTime": "Sub-150ms glass-to-glass",
+    "auxiliarySpace": "Zero-copy socket buffers",
+    "id": 65
+  },
+  {
+    "domain": "DSA & Algorithms",
+    "category": "Machine Learning & AI",
+    "role": "AI Systems Engineer",
+    "difficulty": "Hard",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "Retrieval-Augmented Generation (RAG): Vector Indexing & Hybrid Search",
+    "prompt": "How do you build a high-performance RAG pipeline for corporate documents? Compare dense vector similarity (HNSW / Cosine) with sparse keyword retrieval (BM25) and reciprocal rank fusion (RRF).",
+    "skillsAssessed": [
+      "RAG Architecture",
+      "Vector Databases",
+      "HNSW Index",
+      "BM25",
+      "Reciprocal Rank Fusion"
+    ],
+    "modelAnswerTip": "Dense vectors capture semantic intent but struggle with exact entity IDs, keywords, and domain acronyms. Sparse BM25 catches exact keyword matches. Hybrid search queries both and merges rankings using Reciprocal Rank Fusion (RRF score = 1 / (60 + rank)), followed by cross-encoder re-ranking.",
+    "optimalTime": "O(log N) vector index search",
+    "auxiliarySpace": "Vector index RAM cache",
+    "id": 66
+  },
+  {
+    "domain": "DSA & Algorithms",
+    "category": "Machine Learning & AI",
+    "role": "AI Engineer",
+    "difficulty": "Medium",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "Transformer Self-Attention: Query, Key, Value & KV-Cache",
+    "prompt": "Explain the scaled dot-product attention formula: Attention(Q, K, V) = softmax(Q K^T / sqrt(d_k)) V. Why is KV-cache necessary during auto-regressive token generation, and what is its memory complexity?",
+    "skillsAssessed": [
+      "Transformer Architecture",
+      "Self-Attention",
+      "KV Cache",
+      "Memory Footprint"
+    ],
+    "modelAnswerTip": "In generation, every new token needs attention over all preceding tokens. Without caching, computing K and V repeatedly requires O(N^2) redundant matrix operations. KV-cache persists key and value states in GPU VRAM across token steps, reducing per-token generation to O(N) operations at the cost of O(B * L * H * D) memory.",
+    "optimalTime": "O(N) per generated token",
+    "auxiliarySpace": "O(Batch * SeqLen * Layers * Heads * Dim)",
+    "id": 67
+  },
+  {
+    "domain": "Backend & Core CS",
+    "category": "System Design",
+    "role": "Senior Architect",
+    "difficulty": "Hard",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "Design a Global Distributed Rate Limiter",
+    "prompt": "How do you design a high-throughput global rate limiter handling 1,000,000 requests per second across multi-region data centers? Compare Token Bucket with Sliding Window Log and Redis sliding window counter.",
+    "skillsAssessed": [
+      "Rate Limiting",
+      "Token Bucket",
+      "Sliding Window",
+      "Redis Lua",
+      "Clock Skew"
+    ],
+    "modelAnswerTip": "Token Bucket allows bursts with smooth refill rates. Sliding Window Counter combines current and previous window counts for minimal memory. Multi-region requires regional Redis clusters with local batch synchronization to avoid transatlantic latency on every check.",
+    "optimalTime": "O(1) Redis eval",
+    "auxiliarySpace": "O(Users)",
+    "id": 68
+  },
+  {
+    "domain": "Backend & Core CS",
+    "category": "System Design",
+    "role": "Senior Software Engineer",
+    "difficulty": "Medium",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "Design a URL Shortener Service (TinyURL) at Scale",
+    "prompt": "Design a scalable URL shortening service like TinyURL handling 100M new URLs per month and 10B reads per month. Explain Base62 encoding vs MD5 hash truncation and pre-generated key range generation.",
+    "skillsAssessed": [
+      "Base62 Encoding",
+      "Key Generation Service",
+      "Database Partitioning",
+      "Cache-Aside Pattern"
+    ],
+    "modelAnswerTip": "A 7-character Base62 string provides 62^7 = 3.5 trillion unique URLs. Use a dedicated Key Generation Service (KGS) with a ZooKeeper coordinator to assign non-overlapping integer token ranges to worker nodes, preventing collisions without runtime locking.",
+    "optimalTime": "O(1) Cache read",
+    "auxiliarySpace": "7 bytes per key",
+    "id": 69
+  },
+  {
+    "domain": "Backend & Core CS",
+    "category": "Distributed Systems",
+    "role": "Distributed Systems Engineer",
+    "difficulty": "Hard",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "CAP Theorem vs PACELC Theorem in Distributed Architecture",
+    "prompt": "Beyond the classic CAP Theorem (Consistency, Availability, Partition Tolerance), explain Daniel Abadi\u2019s PACELC theorem. How do MongoDB, DynamoDB, and Spanner map to PACELC?",
+    "skillsAssessed": [
+      "CAP Theorem",
+      "PACELC Theorem",
+      "Linearizability",
+      "Eventual Consistency"
+    ],
+    "modelAnswerTip": "PACELC states: if there is a Partition (P), trade Availability (A) vs Consistency (C); Else (E), trade Latency (L) vs Consistency (C). DynamoDB is PA/EL (favors availability during partitions, low latency during normal operation). Google Spanner is PC/EC using TrueTime hardware atomic clocks.",
+    "optimalTime": "Sub-10ms quorum reads",
+    "auxiliarySpace": "Vector clocks / Version vectors",
+    "id": 70
+  },
+  {
+    "domain": "Database Systems & SQL",
+    "category": "Query Optimization",
+    "role": "Senior Full-Stack",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Composite Index Column Ordering & Covering Indexes",
+    "prompt": "Given a query: SELECT user_id, status FROM orders WHERE tenant_id = 42 AND created_at > '2026-01-01' ORDER BY created_at DESC. How should you order the columns in a composite index for optimal performance?",
+    "skillsAssessed": [
+      "Composite Indexes",
+      "Leftmost Prefix Rule",
+      "Covering Indexes",
+      "Index Skip Scan"
+    ],
+    "modelAnswerTip": "Place equality columns first (tenant_id), followed by range / order by columns (created_at). Include (user_id, status) via INCLUDE clause in PostgreSQL or composite tail to make it an Index-Only Scan (Covering Index), bypassing heap table page lookups.",
+    "optimalTime": "O(log N + K) Index-only scan",
+    "auxiliarySpace": "B-Tree leaf storage",
+    "id": 71
+  },
+  {
+    "domain": "Web & Frontend",
+    "category": "Security & Auth",
+    "role": "Security & Full-Stack",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Secure Web Authentication: JWT in httpOnly Cookies vs LocalStorage with Refresh Tokens",
+    "prompt": "Where should authentication tokens be stored in modern web applications? Compare XSS vulnerabilities in LocalStorage against CSRF vulnerabilities with httpOnly SameSite cookies.",
+    "skillsAssessed": [
+      "JWT Storage",
+      "XSS Prevention",
+      "CSRF Protection",
+      "SameSite Cookies",
+      "Token Rotation"
+    ],
+    "modelAnswerTip": "LocalStorage is vulnerable to XSS token theft via third-party npm packages. httpOnly, Secure, SameSite=Strict/Lax cookies shield tokens from JavaScript access. Guard against CSRF using double-submit cookies or CSRF tokens. Implement short-lived Access Tokens (15m) with rotating Refresh Tokens.",
+    "optimalTime": "O(1) Cookie parse",
+    "auxiliarySpace": "Cookie header payload",
+    "id": 72
+  },
+  {
+    "domain": "Web & Frontend",
+    "category": "Performance & Architecture",
+    "role": "Frontend Engineer",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Web Workers & SharedArrayBuffer for Compute-Heavy Tasks",
+    "prompt": "How do you prevent 60 FPS frame drops on the main UI thread during heavy compute (e.g. computer vision inference or data parsing)? Explain Web Workers, postMessage structured cloning, and zero-copy transferables.",
+    "skillsAssessed": [
+      "Web Workers",
+      "Main Thread 60 FPS",
+      "Transferable Objects",
+      "SharedArrayBuffer"
+    ],
+    "modelAnswerTip": "Offload compute to a dedicated Web Worker thread. By default postMessage deep-clones memory via the structured clone algorithm. Using Transferable Objects (e.g., ArrayBuffer) transfers pointer ownership in O(1) zero-copy time without copying gigabytes across threads.",
+    "optimalTime": "O(1) memory transfer",
+    "auxiliarySpace": "Zero duplicated buffer",
+    "id": 73
+  },
+  {
+    "domain": "DSA & Algorithms",
+    "category": "Backtracking",
+    "role": "Senior Software Engineer",
+    "difficulty": "Hard",
+    "estimatedDuration": "3 mins",
+    "targetDurationSec": 180,
+    "title": "N-Queens Problem: Backtracking with Bitmasks",
+    "prompt": "How do you solve the classic N-Queens placement problem? Compare standard 2D array backtracking against Bitmask optimization using three integers for columns and diagonals.",
+    "skillsAssessed": [
+      "Backtracking",
+      "Bit Manipulation",
+      "N-Queens",
+      "Pruning"
+    ],
+    "modelAnswerTip": "Standard backtracking checks board validity in O(N) per placement. Bitmask optimization uses 3 integers (cols, diag1, diag2) and bitwise operations ((cols | diag1 | diag2)) to identify available positions in O(1) time per row, dramatically speeding up runtime.",
+    "optimalTime": "O(N!) with bitwise pruning",
+    "auxiliarySpace": "O(N) recursion stack",
+    "id": 74
+  },
+  {
+    "domain": "Quantitative & Logical Aptitude",
+    "category": "Probability & Mathematics",
+    "role": "Quantitative & Engineering",
+    "difficulty": "Hard",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Bayes\u2019 Theorem: Medical Diagnosis False Positive Paradox",
+    "prompt": "A rare disease has a 0.1% prevalence. A test is 99% accurate (true positive rate) with a 5% false positive rate. If a random person tests positive, what is the actual probability they have the disease?",
+    "skillsAssessed": [
+      "Bayes Theorem",
+      "Conditional Probability",
+      "Base Rate Fallacy",
+      "Prevalence"
+    ],
+    "modelAnswerTip": "P(D|+) = (P(+|D) * P(D)) / P(+). P(+) = (0.99 * 0.001) + (0.05 * 0.999) = 0.00099 + 0.04995 = 0.05094. Thus P(D|+) = 0.00099 / 0.05094 \u2248 1.94%. Despite high test accuracy, low base rate prevalence means ~98% of positive tests are false positives.",
+    "optimalTime": "O(1) calculation",
+    "auxiliarySpace": "O(1)",
+    "id": 75
+  },
+  {
+    "domain": "DSA & Algorithms",
+    "category": "Binary Search Trees",
+    "role": "Full-Stack & Backend",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Lowest Common Ancestor (LCA) in Binary Search Tree vs Binary Tree",
+    "prompt": "How do you find the Lowest Common Ancestor of two nodes P and Q? Contrast the O(H) iterative approach in a BST against the post-order DFS traversal in an arbitrary Binary Tree.",
+    "skillsAssessed": [
+      "Binary Search Tree",
+      "Binary Tree",
+      "Lowest Common Ancestor",
+      "DFS Traversal"
+    ],
+    "modelAnswerTip": "In a BST, leverage ordering: if both P and Q are smaller than current node, traverse left; if both greater, traverse right; otherwise current node is LCA in O(H) time and O(1) space. In a general Binary Tree, use recursive DFS: return node if it matches P or Q; if both left and right return non-null, root is LCA in O(N) time and O(H) stack space.",
+    "optimalTime": "O(H) in BST vs O(N) in Binary Tree",
+    "auxiliarySpace": "O(1) in BST vs O(H) in Binary Tree",
+    "id": 76
+  },
+  {
+    "domain": "Backend & Core CS",
+    "category": "Cloud Native & Resilience",
+    "role": "Site Reliability Engineer",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Resilience Engineering: Circuit Breakers, Retry with Exponential Backoff & Jitter",
+    "prompt": "When a downstream microservice experiences degradation, why do naive retries cause a thundering herd failure? Explain the Circuit Breaker pattern (Closed, Open, Half-Open) and Full Jitter backoff.",
+    "skillsAssessed": [
+      "Circuit Breaker",
+      "Exponential Backoff",
+      "Full Jitter",
+      "Thundering Herd"
+    ],
+    "modelAnswerTip": "Naive retries compound load on failing services. Exponential backoff increases delay (2^attempt * base), but synchronous retries align in destructive waves. Adding full randomized jitter (random(0, sleep)) scatters requests uniformly. Circuit Breakers trip to Open state after a failure threshold, failing fast without hitting downstream servers.",
+    "optimalTime": "O(1) state evaluation",
+    "auxiliarySpace": "Sliding window failure counter",
+    "id": 77
+  },
+  {
+    "domain": "Web & Frontend",
+    "category": "State Management",
+    "role": "Senior Frontend",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "State Management at Scale: Zustand / Redux Toolkit vs React Context",
+    "prompt": "Why does React Context cause excessive re-renders when managing high-frequency state (e.g. 60 FPS telemetry or audio volume)? How do atomic selectors in Zustand solve this issue?",
+    "skillsAssessed": [
+      "React Context",
+      "Zustand",
+      "Fine-Grained Selectors",
+      "Render Optimization"
+    ],
+    "modelAnswerTip": "React Context re-renders every component consuming the context whenever any field changes, regardless of whether that specific component reads the changed field. Zustand uses external store subscribers outside React\u2019s reconciler; components re-render strictly when their selected state slice fails shallow equality comparison.",
+    "optimalTime": "Sub-millisecond selective re-render",
+    "auxiliarySpace": "External subscriber set",
+    "id": 78
+  },
+  {
+    "domain": "DSA & Algorithms",
+    "category": "Intervals & Sorting",
+    "role": "Full-Stack",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "Merge Overlapping Intervals",
+    "prompt": "Given an array of meeting intervals [start, end], how do you merge all overlapping intervals? Explain sorting by start time and the greedy merge pass.",
+    "skillsAssessed": [
+      "Interval Scheduling",
+      "Sorting",
+      "Greedy Algorithms"
+    ],
+    "modelAnswerTip": "Sort intervals by start time in O(N log N). Iterate linearly: if the current interval starts before or at the previous interval end, merge by updating prev.end = max(prev.end, curr.end). Otherwise, append as a distinct interval. Total time is O(N log N) dominated by sorting, with O(N) space.",
+    "optimalTime": "O(N log N)",
+    "auxiliarySpace": "O(N)",
+    "id": 79
+  },
+  {
+    "domain": "Database Systems & SQL",
+    "category": "Advanced SQL",
+    "role": "Data & Full-Stack",
+    "difficulty": "Medium",
+    "estimatedDuration": "2 mins",
+    "targetDurationSec": 120,
+    "title": "SQL Window Functions: ROW_NUMBER(), RANK(), DENSE_RANK() & Running Totals",
+    "prompt": "Explain the difference between ROW_NUMBER(), RANK(), and DENSE_RANK() when ordering values with ties. How do window frames (ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) calculate running aggregations?",
+    "skillsAssessed": [
+      "Window Functions",
+      "DENSE_RANK",
+      "OVER(PARTITION BY)",
+      "Running Totals"
+    ],
+    "modelAnswerTip": "With ties: ROW_NUMBER assigns distinct sequential numbers (1,2,3). RANK leaves gaps after ties (1,2,2,4). DENSE_RANK assigns sequential numbers without gaps (1,2,2,3). PARTITION BY segments calculation into distinct groups without collapsing rows into GROUP BY aggregates.",
+    "optimalTime": "O(N log N) partition sort",
+    "auxiliarySpace": "Window frame buffer",
+    "id": 80
+  }
+]
